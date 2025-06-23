@@ -27,7 +27,7 @@ function AllArticles() {
       }
     };
     fetchArticles();
-  }, [articles]);
+  }, []);
 
   if (error) {
     return (
@@ -36,13 +36,21 @@ function AllArticles() {
       </section>
     );
   }
-  if (!articles) {
+  if (isLoading) {
     return (
       <section className="article">
         <p>Loading articles...</p>
       </section>
     );
   }
+  if (articles.length === 0) {
+    return (
+      <section className="article">
+        <p>No articles found.</p>
+      </section>
+    );
+  }
+
   return (
     <>
       {articles.map((article) => (
@@ -63,3 +71,5 @@ function AllArticles() {
 }
 
 export default AllArticles;
+
+//todo: look into load handling, look into !articles handling, hyperlink

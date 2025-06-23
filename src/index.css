@@ -57,6 +57,7 @@ main {
 }
 
 main > h2 {
+  justify-self: center;
   font-size: 64px;
 }
 
@@ -64,4 +65,45 @@ main > h2 {
   border: 1px solid black;
   margin: 8px;
   padding: 8px;
+  border-radius: 5px;
+}
+
+.specific-article-item {
+  justify-self: center;
+  border: 1px solid black;
+  margin: 8px;
+  padding: 8px;
+  border-radius: 5px;
+  max-width: 90%;
+}
+
+.specific-article-item > h2 {
+  font-size: 3rem;
+  justify-self: center;
+}
+.specific-article-item > .article-image {
+  display: block;
+  margin: auto;
+  justify-self: center;
+}
+.article-body {
+  border: 1px solid black;
+}
+
+.comments-section {
+  justify-self: center;
+  border: 1px solid black;
+  margin: 8px;
+  padding: 8px;
+  border-radius: 5px;
+  max-width: 90%;
+}
+
+.comment {
+  margin: 8px 0px;
+  border: 1px solid black;
+  padding: 0px 5px;
+}
+.comment-count {
+  justify-self: center;
 }
