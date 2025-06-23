@@ -84,7 +84,6 @@ main > h2 {
 .specific-article-item > .article-image {
   display: block;
   margin: auto;
-  justify-self: center;
 }
 .article-body {
   border: 1px solid black;
@@ -106,4 +105,9 @@ main > h2 {
 }
 .comment-count {
   justify-self: center;
+}
+
+.user-profile {
+  border: 1px solid black;
+  display: flex;
 }

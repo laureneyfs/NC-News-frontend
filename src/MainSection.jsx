@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Routes, Route } from "react-router";
 import AllArticles from "./AllArticles";
 import SingleArticle from "./SingleArticle";
+import UserProfile from "./UserProfile";
 
 function MainSection({ queries }) {
   const [isError, setError] = useState(false);
@@ -16,6 +17,7 @@ function MainSection({ queries }) {
           element={<SingleArticle />}
           queries={queries}
         />
+        <Route path="/users/:username" element={<UserProfile />} />
       </Routes>
     </main>
   );

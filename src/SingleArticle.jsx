@@ -6,53 +6,41 @@ function SingleArticle() {
   const { articleid } = useParams();
   const [error, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
-  const [comments, setComments] = useState(null);
+  const [comments, setComments] = useState([]);
 
   useEffect(() => {
-    setLoading(true);
-    const fetchArticles = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch(
+        setLoading(true);
+
+        const articleRes = await fetch(
           `https://nc-news-3uk2.onrender.com/api/articles/${articleid}`
         );
-        if (!res.ok) {
-          throw new Error("Something went wrong!");
+        if (!articleRes.ok) {
+          throw new Error("Failed to fetch article");
         }
-        const data = await res.json();
-        console.log(data.article);
-        setArticle(data.article);
-        setError(null);
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        setError(err.message);
-      }
-    };
-    fetchArticles();
-  }, []);
+        const articleData = await articleRes.json();
+        setArticle(articleData.article);
 
-  useEffect(() => {
-    setLoading(true);
-    const fetchArticles = async () => {
-      try {
-        const res = await fetch(
+        const commentsRes = await fetch(
           `https://nc-news-3uk2.onrender.com/api/articles/${articleid}/comments`
         );
-        if (!res.ok) {
-          throw new Error("Something went wrong!");
+        if (!commentsRes.ok) {
+          throw new Error("Failed to fetch comments");
         }
-        const data = await res.json();
-        console.log(data.comments);
-        setComments(data.comments);
+        const commentsData = await commentsRes.json();
+        setComments(commentsData.comments);
+
         setError(null);
-        setLoading(false);
       } catch (err) {
-        setLoading(false);
         setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchArticles();
-  }, []);
+    fetchData();
+  }, [articleid]);
+
   if (error) {
     return (
       <section className="article">
@@ -63,7 +51,7 @@ function SingleArticle() {
   if (isLoading) {
     return (
       <section className="article">
-        <p>Loading articles...</p>
+        <p>Loading article...</p>
       </section>
     );
   }

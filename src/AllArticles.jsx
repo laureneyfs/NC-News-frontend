@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 
 function AllArticles() {
   const [isLoading, setLoading] = useState(true);
@@ -28,7 +29,6 @@ function AllArticles() {
     };
     fetchArticles();
   }, []);
-
   if (error) {
     return (
       <section className="article">
@@ -56,13 +56,14 @@ function AllArticles() {
       {articles.map((article) => (
         <div className="article" key={article.article_id}>
           <h3>
-            {article.title} by {article.author}
+            <Link to={`/articles/${article.article_id}`}>{article.title}</Link>{" "}
+            by {article.author}
           </h3>
           <p>
             topic: {article.topic} | posted: {article.created_at}
           </p>
           <p>
-            comments: {article.comments} | votes: {article.votes}
+            comments: {article.comment_count} | votes: {article.votes}
           </p>
         </div>
       ))}
@@ -73,3 +74,4 @@ function AllArticles() {
 export default AllArticles;
 
 //todo: look into load handling, look into !articles handling, hyperlink
+//look into date formatting - maybe helper function?
