@@ -63,7 +63,7 @@ main > h2 {
 
 .article {
   display: flex;
-  margin: 8px 0px;
+  margin-bottom: 8px;
   border: 1px solid black;
   padding: 0px 0px;
   padding-right: 8px;
@@ -114,8 +114,11 @@ main > h2 {
 }
 
 .user-profile {
+  justify-self: center;
+  text-align: center;
   border: 1px solid black;
   display: flex;
+  flex-direction: column;
 }
 
 .vote-block {
@@ -199,4 +202,22 @@ main > h2 {
   font-size: 0.9rem;
   font-style: italic;
   color: #b00;
+}
+
+.sort-block > * {
+  padding: 0px;
+  margin: 0px;
+}
+.sort-block > select {
+  margin-top: 5px;
+  margin-left: 8px;
+}
+.sort-block {
+  margin-bottom: 2px;
+}
+
+.user-avatar {
+  max-height: 256px;
+  max-width: 256px;
+  aspect-ratio: auto;
 }
