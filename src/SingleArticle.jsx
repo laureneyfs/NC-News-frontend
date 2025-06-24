@@ -1,36 +1,24 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
+import Comments from "./ArticleComments";
 
 function SingleArticle() {
   const [article, setArticle] = useState(null);
   const { articleid } = useParams();
   const [error, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
-  const [comments, setComments] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-
-        const articleRes = await fetch(
+        const res = await fetch(
           `https://nc-news-3uk2.onrender.com/api/articles/${articleid}`
         );
-        if (!articleRes.ok) {
-          throw new Error("Failed to fetch article");
-        }
-        const articleData = await articleRes.json();
-        setArticle(articleData.article);
+        if (!res.ok) throw new Error("Failed to fetch article");
 
-        const commentsRes = await fetch(
-          `https://nc-news-3uk2.onrender.com/api/articles/${articleid}/comments`
-        );
-        if (!commentsRes.ok) {
-          throw new Error("Failed to fetch comments");
-        }
-        const commentsData = await commentsRes.json();
-        setComments(commentsData.comments);
-
+        const data = await res.json();
+        setArticle(data.article);
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -38,6 +26,7 @@ function SingleArticle() {
         setLoading(false);
       }
     };
+
     fetchData();
   }, [articleid]);
 
@@ -72,23 +61,11 @@ function SingleArticle() {
           Author: {article.author} | posted: {article.created_at}
         </h3>
         <p>topic: {article.topic}</p>
-
         <section className="article-body">
           <p>{article.body}</p>
         </section>
       </section>
-      <h3 className="comment-count">Displaying {comments?.length} comments</h3>
-      <section className="comments-section">
-        {comments.map((comment) => (
-          <section className="comment" key={comment.comment_id}>
-            <p>
-              <span>{comment.votes} Votes | </span>
-              {comment.author}
-            </p>
-            <p>{comment.body}</p>
-          </section>
-        ))}
-      </section>
+      <Comments articleid={articleid} />
     </>
   );
 }

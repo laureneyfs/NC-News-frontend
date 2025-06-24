@@ -62,10 +62,11 @@ main > h2 {
 }
 
 .article {
+  display: flex;
+  margin: 8px 0px;
   border: 1px solid black;
-  margin: 8px;
-  padding: 8px;
-  border-radius: 5px;
+  padding: 0px 0px;
+  padding-right: 8px;
 }
 
 .specific-article-item {
@@ -99,6 +100,7 @@ main > h2 {
 }
 
 .comment {
+  display: flex;
   margin: 8px 0px;
   border: 1px solid black;
   padding: 0px 5px;
@@ -110,4 +112,33 @@ main > h2 {
 .user-profile {
   border: 1px solid black;
   display: flex;
+}
+
+.vote-block {
+  display: flex;
+  flex-direction: column;
+  padding: 0px;
+  margin: 0px;
+  min-width: 50px;
+  margin-right: 10px;
+  align-content: center;
+  justify-content: center;
+}
+
+.vote-block > * {
+  max-width: 50px;
+  padding: 0px;
+  margin: 0px 0px;
+  text-align: center;
+}
+.vote-block > button {
+  height: 100%;
+  width: 100%;
+  border: 0px;
+  background-color: transparent;
+  font-size: 36px;
+}
+
+.username {
+  font-weight: bold;
 }

@@ -54,18 +54,26 @@ function AllArticles() {
   return (
     <>
       {articles.map((article) => (
-        <div className="article" key={article.article_id}>
-          <h3>
-            <Link to={`/articles/${article.article_id}`}>{article.title}</Link>{" "}
-            by {article.author}
-          </h3>
-          <p>
-            topic: {article.topic} | posted: {article.created_at}
-          </p>
-          <p>
-            comments: {article.comment_count} | votes: {article.votes}
-          </p>
-        </div>
+        <section className="article" key={article.article_id}>
+          <section className="vote-block">
+            <button>↑</button>
+            <p>{article.votes}</p>
+            <button>↓</button>
+          </section>
+          <section className="article-fields">
+            <h3>
+              <Link to={`/articles/${article.article_id}`}>
+                {article.title}
+              </Link>{" "}
+              by <Link to={`/users/${article.author}`}>{article.author}</Link>
+            </h3>
+            <p>
+              topic: {article.topic} | posted:{" "}
+              {new Date(article.created_at).toLocaleString()}
+            </p>
+            <p>{article.comment_count} comments</p>
+          </section>
+        </section>
       ))}
     </>
   );
