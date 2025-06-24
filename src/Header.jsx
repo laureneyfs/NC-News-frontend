@@ -13,6 +13,9 @@ function Header({ username }) {
         <Link to="/articles/create">
           <p>Create Article</p>
         </Link>
+        <Link to="/topics">
+          <p>Topics</p>
+        </Link>
       </header>
     </section>
   );

@@ -9,7 +9,6 @@ function Topics() {
   useEffect(() => {
     const fetchTopics = async () => {
       try {
-        console.log("hello");
         setLoading(true);
         const res = await fetch(`https://nc-news-3uk2.onrender.com/api/topics`);
         if (!res.ok) throw new Error("Something went wrong!");
