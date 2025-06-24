@@ -178,3 +178,25 @@ main > h2 {
   display: flex;
   flex-direction: column;
 }
+
+.new-comment {
+  box-shadow: 0 0 10px 1px #00cf23;
+}
+
+.delete-comment {
+  margin-left: 8px;
+  font-weight: bold;
+}
+
+.comment.comment-deleting {
+  opacity: 0.5;
+  pointer-events: none;
+  position: relative;
+}
+
+.deleting-text {
+  margin-left: 10px;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #b00;
+}

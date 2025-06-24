@@ -4,6 +4,7 @@ import Comments from "./ArticleComments";
 import { Link } from "react-router";
 
 function SingleArticle({ username }) {
+  console.log(username, "article section");
   const [article, setArticle] = useState(null);
   const { articleid } = useParams();
   const [error, setError] = useState(null);
@@ -73,7 +74,7 @@ function SingleArticle({ username }) {
           <p>{article.body}</p>
         </section>
       </section>
-      <Comments articleid={articleid} />
+      <Comments articleid={articleid} username={username} />
     </>
   );
 }

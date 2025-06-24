@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import CreateComment from "./CreateComment";
 
-function Comments({ articleid }) {
+function Comments({ articleid, username }) {
   const [comments, setComments] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
@@ -103,17 +103,56 @@ function Comments({ articleid }) {
     );
   }
 
+  function deleteComment(comment_id) {
+    setComments((curr) =>
+      curr.map((comment) =>
+        comment.comment_id === comment_id
+          ? { ...comment, deleting: true }
+          : comment
+      )
+    );
+    return fetch(
+      `https://nc-news-3uk2.onrender.com/api/comments/${comment_id}`,
+      {
+        method: "DELETE",
+      }
+    )
+      .then((res) => {
+        if (!res.ok) throw new Error("vote failed!");
+        setComments((currComments) =>
+          currComments.filter((comment) => comment.comment_id !== comment_id)
+        );
+      })
+      .catch((err) => {
+        return <p>Error deleting comment: {err}</p>;
+      });
+  }
+
   return (
     <>
-      <CreateComment />
+      <CreateComment
+        articleid={articleid}
+        username={username}
+        onCommentPosted={(newComment) =>
+          setComments((curr) => [{ ...newComment, isNew: true }, ...curr])
+        }
+      />
       <h3 className="comment-count">Displaying {comments.length} comments</h3>
       <section className="comments-section">
         {comments.map((comment) => (
-          <section className="comment" key={comment.comment_id}>
+          <section
+            className={`comment ${comment.isNew ? "new-comment" : ""} ${
+              comment.deleting ? "comment-deleting" : ""
+            }`}
+            key={comment.comment_id}
+          >
             <section className="vote-block">
               <button
                 onClick={() => handleVote(comment.comment_id, 1)}
-                disabled={loadingComments.includes(comment.comment_id)}
+                disabled={
+                  loadingComments.includes(comment.comment_id) ||
+                  comment.deleting
+                }
                 className={comment.userVote === 1 ? "upvoted" : ""}
               >
                 ↑
@@ -121,7 +160,10 @@ function Comments({ articleid }) {
               <p>{comment.votes}</p>
               <button
                 onClick={() => handleVote(comment.comment_id, -1)}
-                disabled={loadingComments.includes(comment.comment_id)}
+                disabled={
+                  loadingComments.includes(comment.comment_id) ||
+                  comment.deleting
+                }
                 className={comment.userVote === -1 ? "downvoted" : ""}
               >
                 ↓
@@ -133,6 +175,18 @@ function Comments({ articleid }) {
                   {comment.author}
                 </Link>{" "}
                 | Posted: {new Date(comment.created_at).toLocaleString()}
+                {username === comment.author && !comment.deleting && (
+                  <button
+                    onClick={() => deleteComment(comment.comment_id)}
+                    className="delete-comment"
+                    disabled={comment.deleting}
+                  >
+                    delete
+                  </button>
+                )}
+                {comment.deleting && (
+                  <span className="deleting-text">Deleting...</span>
+                )}
               </p>
               <p>{comment.body}</p>
             </section>
