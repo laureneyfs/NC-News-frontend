@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import Comments from "./ArticleComments";
+import { Link } from "react-router";
 
-function SingleArticle() {
+function SingleArticle({ username }) {
   const [article, setArticle] = useState(null);
   const { articleid } = useParams();
   const [error, setError] = useState(null);
@@ -57,11 +58,18 @@ function SingleArticle() {
       <section className="specific-article-item">
         <h2>{article.title}</h2>
         <img className="article-image" src={article.article_img_url}></img>
+
         <h3>
-          Author: {article.author} | posted: {article.created_at}
+          Author: <Link to={`/user/${article.author}`}>{article.author}</Link> |
+          Posted: {new Date(article.created_at).toLocaleString()}
         </h3>
         <p>topic: {article.topic}</p>
         <section className="article-body">
+          <section className="vote-block">
+            <button>↑</button>
+            <p>{article.votes}</p>
+            <button>↓</button>
+          </section>
           <p>{article.body}</p>
         </section>
       </section>

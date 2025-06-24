@@ -85,8 +85,13 @@ main > h2 {
 .specific-article-item > .article-image {
   display: block;
   margin: auto;
+  max-width: 30%;
+  max-height: 300px;
+  aspect-ratio: auto;
+  object-fit: cover;
 }
 .article-body {
+  display: flex;
   border: 1px solid black;
 }
 
@@ -103,7 +108,6 @@ main > h2 {
   display: flex;
   margin: 8px 0px;
   border: 1px solid black;
-  padding: 0px 5px;
 }
 .comment-count {
   justify-self: center;
@@ -115,12 +119,12 @@ main > h2 {
 }
 
 .vote-block {
+  background-color: darkgray;
   display: flex;
   flex-direction: column;
   padding: 0px;
   margin: 0px;
   min-width: 50px;
-  margin-right: 10px;
   align-content: center;
   justify-content: center;
 }
@@ -138,7 +142,39 @@ main > h2 {
   background-color: transparent;
   font-size: 36px;
 }
-
+.all-articles-image {
+  height: 130px;
+  margin-right: 1rem;
+  border: 3px solid black;
+  object-fit: cover;
+  aspect-ratio: 1.5 / 1;
+}
 .username {
   font-weight: bold;
+}
+
+.comment-body {
+  margin-left: 0.5rem;
+}
+
+.upvoted {
+  text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 20px #00ff00;
+  color: darkgreen;
+}
+
+.downvoted {
+  text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000, 0 0 20px #ff0000;
+}
+
+#create-article {
+  display: flex;
+  margin: 8px 0px;
+  border: 1px solid black;
+  padding: 8px;
+  flex-direction: column;
+}
+
+#create-article > form {
+  display: flex;
+  flex-direction: column;
 }

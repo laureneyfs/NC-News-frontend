@@ -4,7 +4,7 @@ import { useState } from "react";
 
 function LayoutManager() {
   const [queries, setQueries] = useState({});
-  const [username, setUsername] = useState("guest");
+  const [username, setUsername] = useState("jessjelly");
 
   return (
     <>
