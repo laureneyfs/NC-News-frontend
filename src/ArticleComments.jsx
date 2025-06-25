@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Link } from "react-router";
 import CreateComment from "./CreateComment";
+import { UserContext } from "./contexts/UserContext";
 
-function Comments({ articleid, username }) {
+function Comments({ articleid }) {
   const [comments, setComments] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [loadingComments, setLoadingComments] = useState([]);
+  const { loggedInUser } = useContext(UserContext);
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -132,7 +134,6 @@ function Comments({ articleid, username }) {
     <>
       <CreateComment
         articleid={articleid}
-        username={username}
         onCommentPosted={(newComment) =>
           setComments((curr) => [{ ...newComment, isNew: true }, ...curr])
         }
@@ -175,15 +176,16 @@ function Comments({ articleid, username }) {
                   {comment.author}
                 </Link>{" "}
                 | Posted: {new Date(comment.created_at).toLocaleString()}
-                {username === comment.author && !comment.deleting && (
-                  <button
-                    onClick={() => deleteComment(comment.comment_id)}
-                    className="delete-comment"
-                    disabled={comment.deleting}
-                  >
-                    delete
-                  </button>
-                )}
+                {loggedInUser?.username === comment.author &&
+                  !comment.deleting && (
+                    <button
+                      onClick={() => deleteComment(comment.comment_id)}
+                      className="delete-comment"
+                      disabled={comment.deleting}
+                    >
+                      delete
+                    </button>
+                  )}
                 {comment.deleting && (
                   <span className="deleting-text">Deleting...</span>
                 )}

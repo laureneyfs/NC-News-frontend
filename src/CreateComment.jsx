@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { UserContext } from "./contexts/UserContext";
 
-function CreateComment({ username, articleid, onCommentPosted }) {
+function CreateComment({ articleid, onCommentPosted }) {
   const [commentBody, setCommentBody] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
   const [error, setError] = useState(null);
-
+  const { loggedInUser } = useContext(UserContext);
   function changeComment(e) {
     console.log(e.target.value);
     setCommentBody(e.target.value);
@@ -35,7 +36,7 @@ function CreateComment({ username, articleid, onCommentPosted }) {
         body: JSON.stringify({
           article_id: articleid,
           body: commentBody,
-          username: username,
+          username: loggedInUser.username,
         }),
         headers: { "Content-type": "application/json" },
       }

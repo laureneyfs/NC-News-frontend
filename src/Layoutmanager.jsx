@@ -4,13 +4,12 @@ import { useState } from "react";
 
 function LayoutManager() {
   const [queries, setQueries] = useState({});
-  const [username, setUsername] = useState("jessjelly");
 
   return (
     <>
-      <Header username={username} />
+      <Header />
       <main>
-        <MainSection queries={queries} username={username} />
+        <MainSection queries={queries} />
       </main>
     </>
   );

@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router";
 import Comments from "./ArticleComments";
 import { Link } from "react-router";
+import { UserContext } from "./contexts/UserContext";
 
-function SingleArticle({ username }) {
-  console.log(username, "article section");
+function SingleArticle() {
   const [article, setArticle] = useState(null);
   const { articleid } = useParams();
   const [error, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
+  const { loggedInUser } = useContext(UserContext);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,7 +75,7 @@ function SingleArticle({ username }) {
           <p>{article.body}</p>
         </section>
       </section>
-      <Comments articleid={articleid} username={username} />
+      <Comments articleid={articleid} />
     </>
   );
 }
