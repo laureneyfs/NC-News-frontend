@@ -292,3 +292,30 @@ textarea {
   border-bottom: 1px solid darkred;
   color: darkred;
 }
+
+.article-key {
+  font-weight: bolder;
+}
+
+.vote-count {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.negative-vote-count {
+  color: darkred;
+}
+
+.page-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+#next-page {
+  margin-left: auto;
+}
+
+#prev-page {
+  margin-right: auto;
+}

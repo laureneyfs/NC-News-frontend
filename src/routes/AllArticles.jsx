@@ -12,23 +12,29 @@ function AllArticles() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [sortBy, setSortBy] = useState("");
   const [order, setOrder] = useState("");
+  const [page, setPage] = useState(1);
   const { loggedInUser } = useContext(UserContext);
   const topicFromQuery = searchParams.get("topic");
   const paramsFromPath = useParams();
   const topicFromPath = paramsFromPath.topic;
   const sortFromPath = paramsFromPath.sort_by;
   const orderFromPath = paramsFromPath.order;
+  const pFromPath = paramsFromPath.p;
+  const pFromQuery = searchParams.get("p");
   const sortFromQuery = searchParams.get("sort_by");
   const orderFromQuery = searchParams.get("order");
 
   const paramTopic = topicFromPath || topicFromQuery;
   const paramOrder = orderFromPath || orderFromQuery;
   const paramSortBy = sortFromPath || sortFromQuery;
+  const paramP = pFromPath || pFromQuery;
 
   useEffect(() => {
+    const pageNumber = Number(paramP);
     setSortBy(paramSortBy || "created_at");
     setOrder(paramOrder || "desc");
-  }, [paramSortBy, paramOrder]);
+    setPage(pageNumber > 0 ? pageNumber : 1);
+  }, [paramSortBy, paramOrder, paramP]);
 
   useEffect(() => {
     const baseURL = "https://nc-news-3uk2.onrender.com/api/articles";
@@ -36,6 +42,7 @@ function AllArticles() {
     if (paramTopic) query.append("topic", paramTopic);
     if (paramOrder) query.append("order", paramOrder);
     if (paramSortBy) query.append("sort_by", paramSortBy);
+    if (paramP) query.append("p", paramP);
 
     const fetchArticles = async () => {
       try {
@@ -55,7 +62,7 @@ function AllArticles() {
     };
 
     fetchArticles();
-  }, [paramTopic, paramSortBy, paramOrder]);
+  }, [paramTopic, paramSortBy, paramOrder, paramP]);
 
   function patchArticle(article_id, voteChange) {
     setLoadingArticles((ids) => [...ids, article_id]);
@@ -176,51 +183,101 @@ function AllArticles() {
         onSubmit={handleFilterForm}
       />
       {articles.map((article) => (
-        <section className="article" key={article.article_id}>
-          <section className="vote-block">
-            <button
-              onClick={() => handleVote(article.article_id, 1)}
-              disabled={
-                loggedInUser?.username === article.author ||
-                loadingArticles.includes(article.article_id)
-              }
-              className={article.userVote === 1 ? "upvoted" : ""}
-            >
-              ↑
-            </button>
-            <p>{article.votes}</p>
-            <button
-              onClick={() => handleVote(article.article_id, -1)}
-              disabled={
-                loggedInUser?.username === article.author ||
-                loadingArticles.includes(article.article_id)
-              }
-              className={article.userVote === -1 ? "downvoted" : ""}
-            >
-              ↓
-            </button>
+        <>
+          <section className="article" key={article.article_id}>
+            <section className="vote-block">
+              <button
+                onClick={() => handleVote(article.article_id, 1)}
+                disabled={
+                  loggedInUser?.username === article.author ||
+                  loadingArticles.includes(article.article_id)
+                }
+                className={article.userVote === 1 ? "upvoted" : ""}
+              >
+                ↑
+              </button>
+              <p
+                className={
+                  article.votes < 0
+                    ? "vote-count negative-vote-count"
+                    : "vote-count"
+                }
+              >
+                {article.votes < 1000
+                  ? article.votes
+                  : `${article.votes / 1000}k`}
+              </p>
+              <button
+                onClick={() => handleVote(article.article_id, -1)}
+                disabled={
+                  loggedInUser?.username === article.author ||
+                  loadingArticles.includes(article.article_id)
+                }
+                className={article.userVote === -1 ? "downvoted" : ""}
+              >
+                ↓
+              </button>
+            </section>
+            <img
+              className="all-articles-image"
+              src={article.article_img_url}
+              alt={article.title}
+            />
+            <section className="article-fields">
+              <h3>
+                <Link to={`/articles/${article.article_id}`}>
+                  {article.title}
+                </Link>{" "}
+                by <Link to={`/users/${article.author}`}>{article.author}</Link>
+              </h3>
+              <p>
+                <span className="article-key">topic:</span>{" "}
+                <Link to={`/topics/${article.topic}`}>{article.topic}</Link> |{" "}
+                <span className="article-key">posted:</span>{" "}
+                {new Date(article.created_at).toLocaleString()}
+              </p>
+              <p>{article.comment_count} comments</p>
+            </section>
           </section>
-          <img
-            className="all-articles-image"
-            src={article.article_img_url}
-            alt={article.title}
-          />
-          <section className="article-fields">
-            <h3>
-              <Link to={`/articles/${article.article_id}`}>
-                {article.title}
-              </Link>{" "}
-              by <Link to={`/users/${article.author}`}>{article.author}</Link>
-            </h3>
-            <p>
-              topic:{" "}
-              <Link to={`/topics/${article.topic}`}>{article.topic}</Link> |
-              posted: {new Date(article.created_at).toLocaleString()}
-            </p>
-            <p>{article.comment_count} comments</p>
-          </section>
-        </section>
+        </>
       ))}
+      <section className="page-nav">
+        <button
+          id="prev-page"
+          disabled={page === 1}
+          onClick={() => {
+            const newPage = page - 1;
+            setSearchParams((prev) => {
+              const params = new URLSearchParams(prev);
+              params.set("p", newPage);
+              if (sortBy) params.set("sort_by", sortBy);
+              if (order) params.set("order", order);
+              if (paramTopic) params.set("topic", paramTopic);
+              return params;
+            });
+          }}
+        >
+          Previous Page
+        </button>
+        <p id="page-number">Page: {page}</p>
+        <button
+          id="next-page"
+          disabled={articles.length !== 10}
+          onClick={() => {
+            const newPage = page + 1;
+            setSearchParams((prev) => {
+              const params = new URLSearchParams(prev);
+              params.set("p", newPage);
+              if (sortBy) params.set("sort_by", sortBy);
+              if (order) params.set("order", order);
+              if (paramTopic) params.set("topic", paramTopic);
+              return params;
+            });
+          }}
+        >
+          Next Page
+        </button>
+      </section>
     </>
   );
 }
