@@ -1,8 +1,8 @@
 import { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router";
-import Comments from "./ArticleComments";
+import Comments from "../components/ArticleComments";
 import { Link } from "react-router";
-import { UserContext } from "./contexts/UserContext";
+import { UserContext } from "../contexts/UserContext";
 
 function SingleArticle() {
   const [article, setArticle] = useState(null);

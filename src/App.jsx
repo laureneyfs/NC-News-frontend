@@ -1,4 +1,4 @@
-import LayoutManager from "./Layoutmanager";
+import LayoutManager from "./components/Layoutmanager";
 import { UserProvider } from "./contexts/UserContext";
 
 function App() {

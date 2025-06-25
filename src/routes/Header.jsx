@@ -1,9 +1,9 @@
 import { Link } from "react-router";
-import { UserContext } from "./contexts/UserContext";
+import { UserContext } from "../contexts/UserContext";
 import { useContext } from "react";
 
-function Header({ username }) {
-  const { loggedInUser, setLoggedInUser } = useContext(UserContext);
+function Header() {
+  const { loggedInUser } = useContext(UserContext);
 
   return (
     <section className="top-bar">
@@ -14,20 +14,20 @@ function Header({ username }) {
         {loggedInUser ? (
           <p>
             logged in as:{" "}
-            <Link to={`/users/${loggedInUser.username}`}>
+            <Link className="nav-link" to={`/users/${loggedInUser.username}`}>
               {loggedInUser.username}
             </Link>
           </p>
         ) : (
-          <Link to={`/login`}>
-            <p>log in</p>
+          <Link className="nav-link" to={`/login`}>
+            <p>Log in</p>
           </Link>
         )}
 
-        <Link to="/articles/create">
+        <Link className="nav-link" to="/articles/create">
           <p>Create Article</p>
         </Link>
-        <Link to="/topics">
+        <Link className="nav-link" to="/topics">
           <p>Topics</p>
         </Link>
       </header>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useParams, useSearchParams } from "react-router-dom";
-import ArticleFilter from "./ArticleFilter";
+import ArticleFilter from "../components/ArticleFilter";
 
 function AllArticles() {
   const [isLoading, setLoading] = useState(true);

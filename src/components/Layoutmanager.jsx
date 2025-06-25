@@ -1,4 +1,4 @@
-import Header from "./Header";
+import Header from "../routes/Header";
 import MainSection from "./MainSection";
 import { useState } from "react";
 

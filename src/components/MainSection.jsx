@@ -1,11 +1,11 @@
 import { Routes, Route } from "react-router";
-import AllArticles from "./AllArticles";
-import SingleArticle from "./SingleArticle";
-import UserProfile from "./UserProfile";
-import CreateArticle from "./CreateArticle";
-import Topics from "./Topics";
-import Login from "./Login";
-import InvalidPage from "./invalidPage";
+import AllArticles from "../routes/AllArticles";
+import SingleArticle from "../routes/SingleArticle";
+import UserProfile from "../routes/UserProfile";
+import CreateArticle from "../routes/CreateArticle";
+import Topics from "../routes/Topics";
+import Login from "../routes/Login";
+import InvalidPage from "../routes/invalidPage";
 
 function MainSection({ queries }) {
   return (

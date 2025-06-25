@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect } from "react";
 import { Link } from "react-router";
 import CreateComment from "./CreateComment";
-import { UserContext } from "./contexts/UserContext";
+import { UserContext } from "../contexts/UserContext";
 
 function Comments({ articleid }) {
   const [comments, setComments] = useState([]);
