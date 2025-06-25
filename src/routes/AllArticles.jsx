@@ -163,6 +163,11 @@ function AllArticles() {
 
   return (
     <>
+      {paramTopic && (
+        <h2 id="topic-text">
+          Displaying articles about <span id="topic-name">{paramTopic}</span>
+        </h2>
+      )}
       <ArticleFilter
         sortBy={sortBy}
         order={order}

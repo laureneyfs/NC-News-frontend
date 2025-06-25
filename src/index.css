@@ -252,7 +252,8 @@ a:has(> #logo) {
 
 textarea {
   width: 100%;
-  max-width: 1700px;
+  max-width: 1000px;
+  max-height: 300px;
 }
 
 .nav-link {
@@ -267,4 +268,27 @@ textarea {
 }
 .nav-link:hover {
   background-color: rgb(150, 0, 0);
+}
+
+.nav-user {
+  justify-self: right;
+  color: #ead196;
+  font-size: 20px;
+}
+.logout-link {
+  margin-left: auto;
+}
+
+#topic-text {
+  font-size: 28px;
+}
+
+#topic-name {
+  text-shadow: 1px 0px rgb(255, 0, 0);
+}
+
+.article-poster {
+  font-weight: bold;
+  border-bottom: 1px solid darkred;
+  color: darkred;
 }

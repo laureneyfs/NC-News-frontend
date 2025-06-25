@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import CreateComment from "./CreateComment";
 import { UserContext } from "../contexts/UserContext";
 
-function Comments({ articleid }) {
+function Comments({ articleid, articleauthor }) {
   const [comments, setComments] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
@@ -172,6 +172,11 @@ function Comments({ articleid }) {
             </section>
             <section className="comment-body">
               <p>
+                {articleauthor === comment.author && (
+                  <>
+                    <span className="article-poster">OP</span> |{" "}
+                  </>
+                )}
                 <Link to={`/users/${comment.author}`} className="username">
                   {comment.author}
                 </Link>{" "}

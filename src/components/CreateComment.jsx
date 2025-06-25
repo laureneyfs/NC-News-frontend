@@ -51,9 +51,9 @@ function CreateComment({ articleid, onCommentPosted }) {
 
   return (
     <section className="comments-section">
-      <h3>Reply to Article</h3>
       {loggedInUser ? (
         <form onSubmit={handleSubmit}>
+          <h3>Reply to Article</h3>
           <textarea
             name="postContent"
             rows={5}

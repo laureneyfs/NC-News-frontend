@@ -111,7 +111,9 @@ function SingleArticle() {
           Author: <Link to={`/user/${article.author}`}>{article.author}</Link> |
           Posted: {new Date(article.created_at).toLocaleString()}
         </h3>
-        <p>topic: {article.topic}</p>
+        <h4>
+          topic: <Link to={`/topics/${article.topic}`}>{article.topic}</Link>
+        </h4>
         <section className="article-body">
           <section className="vote-block">
             <button
@@ -133,7 +135,7 @@ function SingleArticle() {
           <p>{article.body}</p>
         </section>
       </section>
-      <Comments articleid={articleid} />
+      <Comments articleid={articleid} articleauthor={article.author} />
     </>
   );
 }
