@@ -16,9 +16,6 @@ function CreateComment({ articleid, onCommentPosted }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!loggedInUser) {
-      navigate(`/login`);
-    }
     setLoadingComments(true);
     setError(null);
     postComment()
@@ -55,16 +52,23 @@ function CreateComment({ articleid, onCommentPosted }) {
   return (
     <section className="comments-section">
       <h3>Reply to Article</h3>
-      <form onSubmit={handleSubmit}>
-        <textarea
-          name="postContent"
-          rows={5}
-          cols={50}
-          value={commentBody}
-          onChange={changeComment}
-        />
-        <button type="submit">Submit</button>
-      </form>
+      {loggedInUser ? (
+        <form onSubmit={handleSubmit}>
+          <textarea
+            name="postContent"
+            rows={5}
+            cols={50}
+            value={commentBody}
+            onChange={changeComment}
+          />
+          <button type="submit">Submit</button>
+        </form>
+      ) : (
+        <>
+          <h4>Log in to Reply to Article</h4>
+          <button onClick={() => navigate(`/login`)}>Log in</button>
+        </>
+      )}
     </section>
   );
 }

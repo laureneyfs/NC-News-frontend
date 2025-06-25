@@ -30,7 +30,7 @@ function Login() {
 
   const handleLogin = (user) => {
     setLoggedInUser(user);
-    navigate(`/`);
+    navigate(-1);
   };
   return (
     <>
