@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Link } from "react-router";
 import { useParams, useSearchParams } from "react-router-dom";
 import ArticleFilter from "../components/ArticleFilter";
+import { UserContext } from "../contexts/UserContext";
 
 function AllArticles() {
   const [isLoading, setLoading] = useState(true);
@@ -11,7 +12,7 @@ function AllArticles() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [sortBy, setSortBy] = useState("");
   const [order, setOrder] = useState("");
-
+  const { loggedInUser } = useContext(UserContext);
   const topicFromQuery = searchParams.get("topic");
   const paramsFromPath = useParams();
   const topicFromPath = paramsFromPath.topic;
@@ -174,7 +175,10 @@ function AllArticles() {
           <section className="vote-block">
             <button
               onClick={() => handleVote(article.article_id, 1)}
-              disabled={loadingArticles.includes(article.article_id)}
+              disabled={
+                loggedInUser?.username === article.author ||
+                loadingArticles.includes(article.article_id)
+              }
               className={article.userVote === 1 ? "upvoted" : ""}
             >
               ↑
@@ -182,7 +186,10 @@ function AllArticles() {
             <p>{article.votes}</p>
             <button
               onClick={() => handleVote(article.article_id, -1)}
-              disabled={loadingArticles.includes(article.article_id)}
+              disabled={
+                loggedInUser?.username === article.author ||
+                loadingArticles.includes(article.article_id)
+              }
               className={article.userVote === -1 ? "downvoted" : ""}
             >
               ↓

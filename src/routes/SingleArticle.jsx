@@ -33,6 +33,52 @@ function SingleArticle() {
     fetchData();
   }, [articleid]);
 
+  function patchArticle(article_id, voteChange) {
+    return fetch(
+      `https://nc-news-3uk2.onrender.com/api/articles/${article_id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ inc_votes: voteChange }),
+        headers: { "Content-type": "application/json" },
+      }
+    )
+      .then((res) => {
+        if (!res.ok) throw new Error("vote failed!");
+        return res.json();
+      })
+      .catch(() => {
+        setArticle((currArticle) =>
+          currArticle.map((article) =>
+            article.article_id === article_id
+              ? { ...article, votes: article.votes - voteChange, userVote: 0 }
+              : article
+          )
+        );
+      });
+  }
+  function handleVote(article_id, vote) {
+    setArticle(() => {
+      let newUserVote = article.userVote || 0;
+      let voteChange = 0;
+      if (vote === newUserVote) {
+        voteChange -= vote;
+        newUserVote = 0;
+      } else if (newUserVote === 0) {
+        voteChange = vote;
+        newUserVote = vote > 0 ? 1 : -1;
+      } else {
+        voteChange = vote * 2;
+        newUserVote = vote > 0 ? 1 : -1;
+      }
+      patchArticle(article_id, voteChange);
+      return {
+        ...article,
+        votes: article.votes + voteChange,
+        userVote: newUserVote,
+      };
+    });
+  }
+
   if (error) {
     return (
       <section className="article">
@@ -68,9 +114,21 @@ function SingleArticle() {
         <p>topic: {article.topic}</p>
         <section className="article-body">
           <section className="vote-block">
-            <button>↑</button>
+            <button
+              onClick={() => handleVote(article.article_id, 1)}
+              disabled={loggedInUser?.username === article.author}
+              className={article.userVote === 1 ? "upvoted" : ""}
+            >
+              ↑
+            </button>
             <p>{article.votes}</p>
-            <button>↓</button>
+            <button
+              onClick={() => handleVote(article.article_id, -1)}
+              disabled={loggedInUser?.username === article.author}
+              className={article.userVote === -1 ? "downvoted" : ""}
+            >
+              ↓
+            </button>
           </section>
           <p>{article.body}</p>
         </section>
