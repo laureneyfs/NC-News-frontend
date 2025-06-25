@@ -1,11 +1,14 @@
 import { useState, useContext } from "react";
 import { UserContext } from "./contexts/UserContext";
+import { useNavigate } from "react-router";
 
 function CreateComment({ articleid, onCommentPosted }) {
   const [commentBody, setCommentBody] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
   const [error, setError] = useState(null);
   const { loggedInUser } = useContext(UserContext);
+  const navigate = useNavigate();
+
   function changeComment(e) {
     console.log(e.target.value);
     setCommentBody(e.target.value);
@@ -13,6 +16,9 @@ function CreateComment({ articleid, onCommentPosted }) {
 
   function handleSubmit(e) {
     e.preventDefault();
+    if (!loggedInUser) {
+      navigate(`/login`);
+    }
     setLoadingComments(true);
     setError(null);
     postComment()

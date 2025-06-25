@@ -5,6 +5,7 @@ import UserProfile from "./UserProfile";
 import CreateArticle from "./CreateArticle";
 import Topics from "./Topics";
 import Login from "./Login";
+import InvalidPage from "./invalidPage";
 
 function MainSection({ queries }) {
   return (
@@ -18,6 +19,7 @@ function MainSection({ queries }) {
         <Route path="/users/:username" element={<UserProfile />} />
         <Route path="/topics/:topic" element={<AllArticles />} />
         <Route path="/login" element={<Login />} />
+        <Route path="*" element={<InvalidPage />} />
       </Routes>
     </main>
   );
