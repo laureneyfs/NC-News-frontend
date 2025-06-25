@@ -6,7 +6,7 @@ function UserProfile() {
   const [articles, setArticles] = useState([]);
   const { username } = useParams();
   const [error, setError] = useState(null);
-  const [isLoadingUser, setLoadingUser] = useState(null);
+  const [isLoadingUser, setLoadingUser] = useState(true);
   const [isLoadingArticles, setLoadingArticles] = useState(null);
   const [articlesError, setArticlesError] = useState(null);
 
@@ -17,7 +17,10 @@ function UserProfile() {
         const res = await fetch(
           `https://nc-news-3uk2.onrender.com/api/users/${username}`
         );
-        if (!res.ok) throw new Error("Failed to fetch user");
+        if (res.status === 404) {
+          throw new Error("User does not exist");
+        } else if (!res.ok)
+          throw new Error("Something went wrong - error fetching user!");
         const data = await res.json();
         setUser(data.user);
         setError(null);
@@ -38,7 +41,10 @@ function UserProfile() {
         const res = await fetch(
           `https://nc-news-3uk2.onrender.com/api/articles?author=${username}`
         );
-        if (!res.ok) throw new Error("Failed to fetch articles");
+        if (!res.ok)
+          throw new Error(
+            "Failed to fetch articles - are you sure the user exists?"
+          );
         const data = await res.json();
         setArticles(data.articles);
         setArticlesError(null);
@@ -52,55 +58,63 @@ function UserProfile() {
     fetchArticlesByUser();
   }, [username]);
 
-  if (error) return <p>Error: {error}</p>;
+  if (error)
+    return (
+      <section className="error-block">
+        <p>Error: {error}</p>
+      </section>
+    );
   if (isLoadingUser) return <p>Loading user profile...</p>;
-  if (!user) return <p>No user found.</p>;
 
   return (
     <>
-      <section className="user-profile">
-        <img
-          className="user-avatar"
-          src={user.avatar_url}
-          alt={`${user.username} avatar`}
-        />
-        <h2>{user.username}</h2>
-        <p>Name: {user.name}</p>
-      </section>
+      {user?.username && (
+        <section className="user-profile">
+          <img
+            className="user-avatar"
+            src={user.avatar_url}
+            alt={`${user.username} avatar`}
+          />
+          <h2>{user.username}</h2>
+          <p>Name: {user.name}</p>
+        </section>
+      )}
+      {user?.username && (
+        <section className="user-articles">
+          <h3>Articles by {user.username}</h3>
 
-      <section className="user-articles">
-        <h3>Articles by {user.username}</h3>
+          {isLoadingArticles && <p>Loading articles...</p>}
+          {articlesError && <p>Error loading articles: {articlesError}</p>}
+          {!isLoadingArticles && articles.length === 0 && (
+            <p>No articles found.</p>
+          )}
 
-        {isLoadingArticles && <p>Loading articles...</p>}
-        {articlesError && <p>Error loading articles: {articlesError}</p>}
-        {!isLoadingArticles && articles.length === 0 && (
-          <p>No articles found.</p>
-        )}
-
-        {articles.map((article) => (
-          <section className="article" key={article.article_id}>
-            <img
-              className="all-articles-image"
-              src={article.article_img_url}
-              alt={article.title}
-            />
-            <section className="article-fields">
-              <h3>
-                <Link to={`/articles/${article.article_id}`}>
-                  {article.title}
-                </Link>{" "}
-                by <Link to={`/users/${article.author}`}>{article.author}</Link>
-              </h3>
-              <p>
-                topic:{" "}
-                <Link to={`/topics/${article.topic}`}>{article.topic}</Link> |
-                posted: {new Date(article.created_at).toLocaleString()}
-              </p>
-              <p>{article.comment_count} comments</p>
+          {articles.map((article) => (
+            <section className="article" key={article.article_id}>
+              <img
+                className="all-articles-image"
+                src={article.article_img_url}
+                alt={article.title}
+              />
+              <section className="article-fields">
+                <h3>
+                  <Link to={`/articles/${article.article_id}`}>
+                    {article.title}
+                  </Link>{" "}
+                  by{" "}
+                  <Link to={`/users/${article.author}`}>{article.author}</Link>
+                </h3>
+                <p>
+                  topic:{" "}
+                  <Link to={`/topics/${article.topic}`}>{article.topic}</Link> |
+                  posted: {new Date(article.created_at).toLocaleString()}
+                </p>
+                <p>{article.comment_count} comments</p>
+              </section>
             </section>
-          </section>
-        ))}
-      </section>
+          ))}
+        </section>
+      )}
     </>
   );
 }

@@ -40,7 +40,7 @@ function AllArticles() {
       try {
         setLoading(true);
         const res = await fetch(`${baseURL}?${query.toString()}`);
-        if (!res.ok) throw new Error("Something went wrong!");
+        if (!res.ok) throw new Error("Topic does not exist!");
         const data = await res.json();
         setArticles(
           data.articles.map((article) => ({ ...article, userVote: 0 }))
