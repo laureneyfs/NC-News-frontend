@@ -84,4 +84,22 @@ const fetchArticles = async () => {
     setLoading(false);
   }
 };
-export { patchComment, postComment, patchArticle, fetchArticles };
+
+const fetchUser = async () => {
+  try {
+    setLoadingUser(true);
+    const res = await fetch(
+      `https://nc-news-3uk2.onrender.com/api/users/${username}`
+    );
+    if (!res.ok) throw new Error("Failed to fetch user");
+    const data = await res.json();
+    setUser(data.user);
+    setError(null);
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoadingUser(false);
+  }
+};
+
+export { patchComment, postComment, patchArticle, fetchArticles, fetchUser };

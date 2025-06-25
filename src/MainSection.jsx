@@ -4,6 +4,7 @@ import SingleArticle from "./SingleArticle";
 import UserProfile from "./UserProfile";
 import CreateArticle from "./CreateArticle";
 import Topics from "./Topics";
+import Login from "./Login";
 
 function MainSection({ queries, username }) {
   return (
@@ -19,6 +20,7 @@ function MainSection({ queries, username }) {
         <Route path="/topics" element={<Topics />} />
         <Route path="/users/:username" element={<UserProfile />} />
         <Route path="/topics/:topic" element={<AllArticles />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </main>
   );
