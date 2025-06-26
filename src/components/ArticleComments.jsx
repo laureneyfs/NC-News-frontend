@@ -1,8 +1,8 @@
 import { useState, useContext, useEffect } from "react";
-import { Link } from "react-router";
 import CreateComment from "./CreateComment";
 import { UserContext } from "../contexts/UserContext";
 import { patchComment, deleteComment, fetchComments } from "../api/api";
+import CommentCard from "./CommentCard";
 
 function Comments({ articleid, articleauthor }) {
   const [comments, setComments] = useState([]);
@@ -123,63 +123,15 @@ function Comments({ articleid, articleauthor }) {
       <h3 className="comment-count">Displaying {comments.length} comments</h3>
       <section className="comments-section">
         {comments.map((comment) => (
-          <section
-            className={`comment ${comment.isNew ? "new-comment" : ""} ${
-              comment.deleting ? "comment-deleting" : ""
-            }`}
+          <CommentCard
             key={comment.comment_id}
-          >
-            <section className="vote-block">
-              <button
-                onClick={() => handleVote(comment.comment_id, 1)}
-                disabled={
-                  loadingComments.includes(comment.comment_id) ||
-                  comment.deleting
-                }
-                className={comment.userVote === 1 ? "upvoted" : ""}
-              >
-                ↑
-              </button>
-              <p>{comment.votes}</p>
-              <button
-                onClick={() => handleVote(comment.comment_id, -1)}
-                disabled={
-                  loadingComments.includes(comment.comment_id) ||
-                  comment.deleting
-                }
-                className={comment.userVote === -1 ? "downvoted" : ""}
-              >
-                ↓
-              </button>
-            </section>
-            <section className="comment-body">
-              <p>
-                {articleauthor === comment.author && (
-                  <>
-                    <span className="article-poster">OP</span> |{" "}
-                  </>
-                )}
-                <Link to={`/users/${comment.author}`} className="username">
-                  {comment.author}
-                </Link>{" "}
-                | Posted: {new Date(comment.created_at).toLocaleString()}
-                {loggedInUser?.username === comment.author &&
-                  !comment.deleting && (
-                    <button
-                      onClick={() => handleDelete(comment.comment_id)}
-                      className="delete-comment"
-                      disabled={comment.deleting}
-                    >
-                      delete
-                    </button>
-                  )}
-                {comment.deleting && (
-                  <span className="deleting-text">Deleting...</span>
-                )}
-              </p>
-              <p>{comment.body}</p>
-            </section>
-          </section>
+            comment={comment}
+            articleauthor={articleauthor}
+            loggedInUser={loggedInUser}
+            onDelete={handleDelete}
+            onVote={handleVote}
+            isLoading={loadingComments.includes(comment.comment_id)}
+          />
         ))}
       </section>
     </>
