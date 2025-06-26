@@ -25,6 +25,10 @@ function CreateArticle() {
   }
   function handleSubmit(e) {
     e.preventDefault();
+    if (!loggedInUser) {
+      setError("You must be logged in to post an article.");
+      return;
+    }
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setFormErrors(validationErrors);
@@ -48,11 +52,13 @@ function CreateArticle() {
     const errors = {};
     const imageRegex = /^https?:\/\/.+\.(jpg|jpeg|png|gif)$/i;
     const { title, topic, body, image } = formData;
-    if (!title.trim()) errors.title = "Title is required";
+    if (!title.trim().length < 5)
+      errors.title = "Title must be at least 5 characters";
     if (!topic.trim()) errors.topic = "Topic is required";
-    if (!body.trim()) errors.body = "Body is required";
+    if (body.trim().length < 20)
+      errors.body = "Body must be at least 20 characters";
     if (image && !imageRegex.test(image)) {
-      errors.image = "Image must be a valid URL to an image";
+      errors.image = "Must be a valid URL to an image";
     }
     return errors;
   }
@@ -98,6 +104,7 @@ function CreateArticle() {
           />
           {formErrors.body && <p className="error">{formErrors.body}</p>}
           <button type="submit">Submit</button>
+          {processing && <p className="processing">Creating Article...</p>}
         </form>
       ) : (
         <>

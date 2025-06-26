@@ -8,6 +8,8 @@ function CreateComment({ articleid, onCommentPosted }) {
   const [loadingComments, setLoadingComments] = useState(false);
   const [error, setError] = useState(null);
   const { loggedInUser } = useContext(UserContext);
+  const [formError, setFormError] = useState(null);
+
   const navigate = useNavigate();
 
   function changeComment(e) {
@@ -16,8 +18,18 @@ function CreateComment({ articleid, onCommentPosted }) {
 
   function handleSubmit(e) {
     e.preventDefault();
+    if (!loggedInUser) {
+      setError("You must be logged in to post a comment.");
+      return;
+    }
+    const trimmed = commentBody.trim();
+    if (!trimmed) {
+      setFormError(true);
+      return;
+    }
     setLoadingComments(true);
     setError(null);
+    setFormError(null);
     postComment(articleid, commentBody, loggedInUser)
       .then((data) => {
         console.log(data);
@@ -43,7 +55,12 @@ function CreateComment({ articleid, onCommentPosted }) {
             value={commentBody}
             onChange={changeComment}
           />
-          <button type="submit">Submit</button>
+          {formError && (
+            <p className="error">You cannot post a blank comment!</p>
+          )}
+          <button type="submit" disabled={loadingComments}>
+            Submit
+          </button>
         </form>
       ) : (
         <>
