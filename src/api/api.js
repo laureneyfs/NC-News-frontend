@@ -42,7 +42,7 @@ export function postComment(articleId, commentBody, loggedInUser) {
     }),
     headers: { "Content-type": "application/json" },
   }).then((res) => {
-    if (!res.ok) throw new Error("post failed!");
+    if (!res.ok) throw new Error("comment failed!");
     return res.json();
   });
 }
@@ -99,6 +99,24 @@ export function patchComment(commentId, vote) {
     headers: { "Content-type": "application/json" },
   }).then((res) => {
     if (!res.ok) throw new Error("vote failed!");
+    return res.json();
+  });
+}
+
+export function postArticle(title, topic, articleBody, loggedInUser, image) {
+  console.log(loggedInUser);
+  return fetch(`${baseUrl}/articles`, {
+    method: "POST",
+    body: JSON.stringify({
+      article_img_url: image,
+      title: title,
+      topic: topic,
+      body: articleBody,
+      author: loggedInUser.username,
+    }),
+    headers: { "Content-type": "application/json" },
+  }).then((res) => {
+    if (!res.ok) throw new Error("post failed!");
     return res.json();
   });
 }

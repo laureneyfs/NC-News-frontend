@@ -11,7 +11,6 @@ function CreateComment({ articleid, onCommentPosted }) {
   const navigate = useNavigate();
 
   function changeComment(e) {
-    console.log(e.target.value);
     setCommentBody(e.target.value);
   }
 
@@ -36,7 +35,7 @@ function CreateComment({ articleid, onCommentPosted }) {
     <section className="comments-section">
       {loggedInUser ? (
         <form onSubmit={handleSubmit}>
-          <h3>Reply to Article</h3>
+          <h3>Reply to article</h3>
           <textarea
             name="postContent"
             rows={5}
@@ -48,7 +47,7 @@ function CreateComment({ articleid, onCommentPosted }) {
         </form>
       ) : (
         <>
-          <h4>Log in to Reply to Article</h4>
+          <h4>Log in to reply to article</h4>
           <button onClick={() => navigate(`/login`)}>Log in</button>
         </>
       )}

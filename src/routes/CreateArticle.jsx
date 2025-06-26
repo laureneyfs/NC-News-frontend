@@ -1,15 +1,110 @@
+import { UserContext } from "../contexts/UserContext";
+import { useState, useContext } from "react";
+import { useNavigate } from "react-router";
+import { postArticle } from "../api/api";
+
 function CreateArticle() {
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
+  const { loggedInUser } = useContext(UserContext);
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    title: "",
+    topic: "",
+    image: "",
+    body: "",
+  });
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+  function handleSubmit(e) {
+    e.preventDefault();
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setFormErrors(validationErrors);
+      return;
+    }
+    setProcessing(true);
+    setError(null);
+    setFormErrors({});
+    const { title, topic, body, image } = formData;
+    postArticle(title, topic, body, loggedInUser, image)
+      .then((data) => {
+        navigate(`/articles/${data.createdArticle.article_id}`);
+      })
+      .catch((err) => {
+        setError(err.message);
+      })
+      .finally(() => setProcessing(false));
+  }
+
+  function validateForm() {
+    const errors = {};
+    const imageRegex = /^https?:\/\/.+\.(jpg|jpeg|png|gif)$/i;
+    const { title, topic, body, image } = formData;
+    if (!title.trim()) errors.title = "Title is required";
+    if (!topic.trim()) errors.topic = "Topic is required";
+    if (!body.trim()) errors.body = "Body is required";
+    if (image && !imageRegex.test(image)) {
+      errors.image = "Image must be a valid URL to an image";
+    }
+    return errors;
+  }
   return (
     <section id="create-article">
       <h2>Create an Article</h2>
-      <form>
-        <label htmlFor="create-title">Title</label>
-        <input type="text" id="create-title" />
-        <label htmlFor="create-image">Image</label>
-        <input type="text" id="create-image" />
-        <label htmlFor="create-body">Body</label>
-        <input type="text" id="create-body" />
-      </form>
+      {loggedInUser ? (
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="article-title">Title</label>
+          <input
+            type="text"
+            name="title"
+            id="article-title"
+            value={formData.title}
+            onChange={handleChange}
+          />
+          {formErrors.title && <p className="error">{formErrors.title}</p>}
+          <label htmlFor="article-topic">Topic</label>
+          <input
+            type="text"
+            name="topic"
+            id="article-topic"
+            value={formData.topic}
+            onChange={handleChange}
+          />
+          {formErrors.topic && <p className="error">{formErrors.topic}</p>}
+          <label htmlFor="article-image">Image</label>
+          <input
+            type="text"
+            name="image"
+            id="article-image"
+            value={formData.image}
+            onChange={handleChange}
+          />
+          <label htmlFor="article-body">Body</label>
+          <textarea
+            name="body"
+            id="article-body"
+            rows="5"
+            cols="33"
+            value={formData.body}
+            onChange={handleChange}
+          />
+          {formErrors.body && <p className="error">{formErrors.body}</p>}
+          <button type="submit">Submit</button>
+        </form>
+      ) : (
+        <>
+          <h4>Log in to create an article!</h4>
+          <button onClick={() => navigate(`/login`)}>Log in</button>
+        </>
+      )}
     </section>
   );
 }
