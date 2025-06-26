@@ -2,11 +2,11 @@ import { Link } from "react-router-dom";
 
 function ArticleCard({
   article,
-  isDeleting,
-  isVoting,
-  onVote,
+  isDeleting = false,
+  isVoting = false,
+  onVote = () => {},
   onDelete,
-  currentUser,
+  currentUser = {},
   deleteError,
 }) {
   const {
@@ -51,11 +51,13 @@ function ArticleCard({
           ↓
         </button>
       </section>
+
       <img
         className="all-articles-image"
         src={article_img_url}
         alt={title || "Article image"}
       />
+
       <section className="article-fields">
         <h3>
           <Link to={`/articles/${article_id}`}>{title}</Link> by{" "}
@@ -69,7 +71,8 @@ function ArticleCard({
         </p>
 
         <p>{comment_count} comments</p>
-        {isAuthor && (
+
+        {onDelete && isAuthor && (
           <button onClick={() => onDelete(article_id)} disabled={isDeleting}>
             {isDeleting ? "Deleting..." : "Delete"}
           </button>

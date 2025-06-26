@@ -93,7 +93,9 @@ export function fetchUserByUsername(username) {
   });
 }
 export function fetchArticlesByUsername(username) {
-  return fetch(`${baseUrl}/articles?author=${username}`).then((res) => {
+  return fetch(
+    `${baseUrl}/articles?author=${username}&limit=9223372036854775807`
+  ).then((res) => {
     if (!res.ok) throw new Error(`Failed to fetch Articles by ${username}!`);
     return res.json();
   });

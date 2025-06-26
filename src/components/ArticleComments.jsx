@@ -114,26 +114,45 @@ function Comments({ articleid, articleauthor }) {
 
   return (
     <>
-      <CreateComment
-        articleid={articleid}
-        onCommentPosted={(newComment) =>
-          setComments((curr) => [{ ...newComment, isNew: true }, ...curr])
-        }
-      />
-      <h3 className="comment-count">Displaying {comments.length} comments</h3>
-      <section className="comments-section">
-        {comments.map((comment) => (
-          <CommentCard
-            key={comment.comment_id}
-            comment={comment}
-            articleauthor={articleauthor}
-            loggedInUser={loggedInUser}
-            onDelete={handleDelete}
-            onVote={handleVote}
-            isLoading={loadingComments.includes(comment.comment_id)}
+      {comments.length === 0 ? (
+        <>
+          <h3 className="comment-count">
+            This article has no comments...yet! Be the first!
+          </h3>
+          <CreateComment
+            articleid={articleid}
+            onCommentPosted={(newComment) =>
+              setComments((curr) => [{ ...newComment, isNew: true }, ...curr])
+            }
           />
-        ))}
-      </section>
+        </>
+      ) : (
+        <>
+          {" "}
+          <CreateComment
+            articleid={articleid}
+            onCommentPosted={(newComment) =>
+              setComments((curr) => [{ ...newComment, isNew: true }, ...curr])
+            }
+          />
+          <h3 className="comment-count">
+            Displaying {comments.length} comments
+          </h3>
+          <section className="comments-section">
+            {comments.map((comment) => (
+              <CommentCard
+                key={comment.comment_id}
+                comment={comment}
+                articleauthor={articleauthor}
+                loggedInUser={loggedInUser}
+                onDelete={handleDelete}
+                onVote={handleVote}
+                isLoading={loadingComments.includes(comment.comment_id)}
+              />
+            ))}
+          </section>
+        </>
+      )}
     </>
   );
 }

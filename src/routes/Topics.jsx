@@ -38,12 +38,17 @@ function Topics() {
   return (
     <>
       {topics.map((topic) => (
-        <section className="article" key={topic.slug}>
-          <Link to={`/topics/${topic.slug}`}>
+        <Link
+          to={`/topics/${topic.slug}`}
+          key={topic.slug}
+          className="link-no-decoration"
+        >
+          <section className="topic-wrapper">
             <h2>{topic.slug}</h2>
-          </Link>
-          <p>{topic.description}</p>
-        </section>
+
+            <p>{topic.description}</p>
+          </section>
+        </Link>
       ))}
     </>
   );

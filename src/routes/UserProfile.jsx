@@ -1,6 +1,13 @@
-import { useParams, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { fetchArticlesByUsername, fetchUserByUsername } from "../api/api";
+import { useParams } from "react-router-dom";
+import { useEffect, useState, useContext } from "react";
+import {
+  fetchArticlesByUsername,
+  fetchUserByUsername,
+  patchArticle,
+} from "../api/api";
+import ArticleCard from "../components/ArticleCard";
+import { UserContext } from "../contexts/UserContext";
+import { computeVoteUpdate } from "../utils/voting";
 
 function UserProfile() {
   const [user, setUser] = useState(null);
@@ -8,8 +15,11 @@ function UserProfile() {
   const { username } = useParams();
   const [error, setError] = useState(null);
   const [isLoadingUser, setLoadingUser] = useState(true);
-  const [isLoadingArticles, setLoadingArticles] = useState(null);
+  const [isLoadingArticles, setLoadingArticles] = useState(false);
   const [articlesError, setArticlesError] = useState(null);
+  const [votingArticleIds, setVotingArticleIds] = useState([]);
+  const { loggedInUser } = useContext(UserContext);
+  const [pageStart, setPageStart] = useState(0);
 
   useEffect(() => {
     setLoadingUser(true);
@@ -41,12 +51,54 @@ function UserProfile() {
       });
   }, [username]);
 
+  const handleVote = (article_id, vote) => {
+    const article = articles.find(
+      (article) => article.article_id === article_id
+    );
+    if (!article) return;
+
+    const { voteChange, newUserVote } = computeVoteUpdate(
+      article.userVote,
+      vote
+    );
+
+    const originalArticle = { ...article };
+
+    setArticles((currArticles) =>
+      currArticles.map((article) =>
+        article.article_id === article_id
+          ? {
+              ...article,
+              votes: article.votes + voteChange,
+              userVote: newUserVote,
+            }
+          : article
+      )
+    );
+
+    setVotingArticleIds((prev) => [...prev, article_id]);
+
+    patchArticle(article_id, voteChange)
+      .catch(() => {
+        setArticles((currArticles) =>
+          currArticles.map((article) =>
+            article.article_id === article_id ? originalArticle : article
+          )
+        );
+        setError("Failed to register vote :(");
+      })
+      .finally(() => {
+        setVotingArticleIds((prev) => prev.filter((id) => id !== article_id));
+      });
+  };
+
   if (error)
     return (
       <section className="error-block">
         <p>Error: {error}</p>
       </section>
     );
+
   if (isLoadingUser) return <p>Loading user profile...</p>;
 
   return (
@@ -58,10 +110,13 @@ function UserProfile() {
             src={user.avatar_url}
             alt={`${user.username} avatar`}
           />
-          <h2>{user.username}</h2>
-          <p>Name: {user.name}</p>
+          <section className="profile-fields">
+            <h2>{user.username}</h2>
+            <p>Name: {user.name}</p>
+          </section>
         </section>
       )}
+
       {user?.username && (
         <section className="user-articles">
           <h3>Articles by {user.username}</h3>
@@ -72,32 +127,35 @@ function UserProfile() {
             <p>No articles found.</p>
           )}
 
-          {articles.map((article) => (
-            <section className="article" key={article.article_id}>
-              <img
-                className="all-articles-image"
-                src={article.article_img_url}
-                alt={article.title}
-              />
-              <section className="article-fields">
-                <h3>
-                  <Link to={`/articles/${article.article_id}`}>
-                    {article.title}
-                  </Link>{" "}
-                  by{" "}
-                  <Link to={`/users/${article.author}`}>{article.author}</Link>
-                </h3>
-                <p>
-                  topic:{" "}
-                  <Link to={`/topics/${article.topic}`}>{article.topic}</Link> |
-                  posted: {new Date(article.created_at).toLocaleString()}
-                </p>
-                <p>{article.comment_count} comments</p>
-              </section>
-            </section>
+          {articles.slice(pageStart, pageStart + 5).map((article) => (
+            <ArticleCard
+              key={article.article_id}
+              article={article}
+              onVote={handleVote}
+              isVoting={votingArticleIds.includes(article.article_id)}
+              currentUser={loggedInUser}
+            />
           ))}
         </section>
       )}
+
+      <section className="page-nav">
+        <button
+          id="prev-page"
+          disabled={pageStart === 0}
+          onClick={() => setPageStart(pageStart - 5)}
+        >
+          Previous Page
+        </button>
+        <p id="page-number">Page: {Math.floor(pageStart / 5) + 1}</p>
+        <button
+          id="next-page"
+          disabled={pageStart + 5 >= articles.length}
+          onClick={() => setPageStart(pageStart + 5)}
+        >
+          Next Page
+        </button>
+      </section>
     </>
   );
 }
