@@ -33,11 +33,10 @@ body {
 }
 
 .top-bar > header {
+  z-index: 1000;
   background-color: rgb(165, 0, 0);
   position: fixed;
   max-height: 48px;
-  display: flex;
-  align-items: center;
   height: 100%;
   display: flex;
   align-items: center;
