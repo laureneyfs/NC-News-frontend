@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { useParams, useSearchParams } from "react-router-dom";
 import ArticleFilter from "../components/ArticleFilter";
 import { UserContext } from "../contexts/UserContext";
+import { patchArticle, fetchArticles } from "../api/api";
 
 function AllArticles() {
   const [isLoading, setLoading] = useState(true);
@@ -37,67 +38,38 @@ function AllArticles() {
   }, [paramSortBy, paramOrder, paramP]);
 
   useEffect(() => {
-    const baseURL = "https://nc-news-3uk2.onrender.com/api/articles";
-    const query = new URLSearchParams();
-    if (paramTopic) query.append("topic", paramTopic);
-    if (paramOrder) query.append("order", paramOrder);
-    if (paramSortBy) query.append("sort_by", paramSortBy);
-    if (paramP) query.append("p", paramP);
+    setLoading(true);
+    const queryParams = {
+      topic: paramTopic,
+      order: paramOrder,
+      sort_by: paramSortBy,
+      p: paramP,
+    };
 
-    const fetchArticles = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(`${baseURL}?${query.toString()}`);
-        if (!res.ok) throw new Error("Topic does not exist!");
-        const data = await res.json();
+    fetchArticles(queryParams)
+      .then((data) => {
         setArticles(
           data.articles.map((article) => ({ ...article, userVote: 0 }))
         );
         setError(null);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
-  }, [paramTopic, paramSortBy, paramOrder, paramP]);
-
-  function patchArticle(article_id, voteChange) {
-    setLoadingArticles((ids) => [...ids, article_id]);
-    return fetch(
-      `https://nc-news-3uk2.onrender.com/api/articles/${article_id}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify({ inc_votes: voteChange }),
-        headers: { "Content-type": "application/json" },
-      }
-    )
-      .then((res) => {
-        if (!res.ok) throw new Error("vote failed!");
-        return res.json();
       })
-      .catch(() => {
-        setArticles((currArticles) =>
-          currArticles.map((article) =>
-            article.article_id === article_id
-              ? { ...article, votes: article.votes - voteChange, userVote: 0 }
-              : article
-          )
-        );
+      .catch((err) => {
+        setError(err.message);
       })
       .finally(() => {
-        setLoadingArticles((ids) => ids.filter((id) => id !== article_id));
+        setLoading(false);
       });
-  }
+  }, [paramTopic, paramSortBy, paramOrder, paramP]);
 
   function handleVote(article_id, vote) {
+    setLoadingArticles((ids) => [...ids, article_id]);
     setArticles((currArticles) =>
       currArticles.map((article) => {
         if (article.article_id !== article_id) return article;
+
         let newUserVote = article.userVote || 0;
         let voteChange = 0;
+
         if (vote === newUserVote) {
           voteChange -= vote;
           newUserVote = 0;
@@ -108,7 +80,7 @@ function AllArticles() {
           voteChange = vote * 2;
           newUserVote = vote > 0 ? 1 : -1;
         }
-        patchArticle(article_id, voteChange);
+
         return {
           ...article,
           votes: article.votes + voteChange,
@@ -116,8 +88,25 @@ function AllArticles() {
         };
       })
     );
-  }
 
+    patchArticle(article_id, vote)
+      .catch(() => {
+        setArticles((currArticles) =>
+          currArticles.map((article) =>
+            article.article_id === article_id
+              ? {
+                  ...article,
+                  votes: article.votes - vote,
+                  userVote: 0,
+                }
+              : article
+          )
+        );
+      })
+      .finally(() => {
+        setLoadingArticles((ids) => ids.filter((id) => id !== article_id));
+      });
+  }
   function handleSort(e) {
     setSortBy(e.target.value);
   }
@@ -183,63 +172,61 @@ function AllArticles() {
         onSubmit={handleFilterForm}
       />
       {articles.map((article) => (
-        <>
-          <section className="article" key={article.article_id}>
-            <section className="vote-block">
-              <button
-                onClick={() => handleVote(article.article_id, 1)}
-                disabled={
-                  loggedInUser?.username === article.author ||
-                  loadingArticles.includes(article.article_id)
-                }
-                className={article.userVote === 1 ? "upvoted" : ""}
-              >
-                ↑
-              </button>
-              <p
-                className={
-                  article.votes < 0
-                    ? "vote-count negative-vote-count"
-                    : "vote-count"
-                }
-              >
-                {article.votes < 1000
-                  ? article.votes
-                  : `${article.votes / 1000}k`}
-              </p>
-              <button
-                onClick={() => handleVote(article.article_id, -1)}
-                disabled={
-                  loggedInUser?.username === article.author ||
-                  loadingArticles.includes(article.article_id)
-                }
-                className={article.userVote === -1 ? "downvoted" : ""}
-              >
-                ↓
-              </button>
-            </section>
-            <img
-              className="all-articles-image"
-              src={article.article_img_url}
-              alt={article.title}
-            />
-            <section className="article-fields">
-              <h3>
-                <Link to={`/articles/${article.article_id}`}>
-                  {article.title}
-                </Link>{" "}
-                by <Link to={`/users/${article.author}`}>{article.author}</Link>
-              </h3>
-              <p>
-                <span className="article-key">topic:</span>{" "}
-                <Link to={`/topics/${article.topic}`}>{article.topic}</Link> |{" "}
-                <span className="article-key">posted:</span>{" "}
-                {new Date(article.created_at).toLocaleString()}
-              </p>
-              <p>{article.comment_count} comments</p>
-            </section>
+        <section className="article" key={article.article_id}>
+          <section className="vote-block">
+            <button
+              onClick={() => handleVote(article.article_id, 1)}
+              disabled={
+                loggedInUser?.username === article.author ||
+                loadingArticles.includes(article.article_id)
+              }
+              className={article.userVote === 1 ? "upvoted" : ""}
+            >
+              ↑
+            </button>
+            <p
+              className={
+                article.votes < 0
+                  ? "vote-count negative-vote-count"
+                  : "vote-count"
+              }
+            >
+              {article.votes < 1000
+                ? article.votes
+                : `${article.votes / 1000}k`}
+            </p>
+            <button
+              onClick={() => handleVote(article.article_id, -1)}
+              disabled={
+                loggedInUser?.username === article.author ||
+                loadingArticles.includes(article.article_id)
+              }
+              className={article.userVote === -1 ? "downvoted" : ""}
+            >
+              ↓
+            </button>
           </section>
-        </>
+          <img
+            className="all-articles-image"
+            src={article.article_img_url}
+            alt={article.title}
+          />
+          <section className="article-fields">
+            <h3>
+              <Link to={`/articles/${article.article_id}`}>
+                {article.title}
+              </Link>{" "}
+              by <Link to={`/users/${article.author}`}>{article.author}</Link>
+            </h3>
+            <p>
+              <span className="article-key">topic:</span>{" "}
+              <Link to={`/topics/${article.topic}`}>{article.topic}</Link> |{" "}
+              <span className="article-key">posted:</span>{" "}
+              {new Date(article.created_at).toLocaleString()}
+            </p>
+            <p>{article.comment_count} comments</p>
+          </section>
+        </section>
       ))}
       <section className="page-nav">
         <button
