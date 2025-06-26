@@ -52,7 +52,7 @@ function CreateArticle() {
     const errors = {};
     const imageRegex = /^https?:\/\/.+\.(jpg|jpeg|png|gif)$/i;
     const { title, topic, body, image } = formData;
-    if (!title.trim().length < 5)
+    if (title.trim().length < 5)
       errors.title = "Title must be at least 5 characters";
     if (!topic.trim()) errors.topic = "Topic is required";
     if (body.trim().length < 20)
@@ -93,6 +93,7 @@ function CreateArticle() {
             value={formData.image}
             onChange={handleChange}
           />
+          {formErrors.image && <p className="error">{formErrors.image}</p>}
           <label htmlFor="article-body">Body</label>
           <textarea
             name="body"

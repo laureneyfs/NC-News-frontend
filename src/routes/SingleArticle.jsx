@@ -3,8 +3,9 @@ import { useParams } from "react-router";
 import Comments from "../components/ArticleComments";
 import { Link } from "react-router";
 import { UserContext } from "../contexts/UserContext";
-import { patchArticle, fetchArticleById } from "../api/api";
+import { patchArticle, fetchArticleById, deleteArticle } from "../api/api";
 import { computeVoteUpdate } from "../utils/voting";
+import { useNavigate } from "react-router";
 
 function SingleArticle() {
   const [article, setArticle] = useState(null);
@@ -13,6 +14,10 @@ function SingleArticle() {
   const [isLoading, setLoading] = useState(false);
   const { loggedInUser } = useContext(UserContext);
   const [isVoting, setIsVoting] = useState(false);
+  const [deleteError, setDeleteError] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
@@ -28,6 +33,21 @@ function SingleArticle() {
         setLoading(false);
       });
   }, [articleid]);
+
+  function handleDelete(article_id) {
+    setDeleteLoading(true);
+    deleteArticle(article_id)
+      .then(() => {
+        setArticle(null);
+        setIsDeleted(true);
+      })
+      .catch((err) => {
+        setDeleteError(true);
+      })
+      .finally(() => {
+        setDeleteLoading(false);
+      });
+  }
 
   function handleVote(article_id, vote) {
     setIsVoting(true);
@@ -58,32 +78,46 @@ function SingleArticle() {
         setIsVoting(false);
       });
   }
-
+  if (isDeleted) {
+    return (
+      <section className="article">
+        <h2>Article deleted successfully</h2>
+        <button className="deleted-article-button" onClick={() => navigate(-1)}>
+          Back
+        </button>
+        <Link to="/">
+          <button className="deleted-article-button">Home</button>
+        </Link>
+      </section>
+    );
+  }
   if (error) {
     return (
       <section className="article">
-        <p>Error: {error}</p>
+        <h2 className="error">Error: {error}</h2>
       </section>
     );
   }
   if (isLoading) {
     return (
       <section className="article">
-        <p>Loading article...</p>
+        <h2>Loading article...</h2>
       </section>
     );
   }
   if (!article) {
     return (
       <section className="article">
-        <p>No article found.</p>
+        <h2>No article found.</h2>
       </section>
     );
   }
 
   return (
     <>
-      <section className="specific-article-item">
+      <section
+        className={`specific-article-item ${deleteLoading ? "deleting" : ""}`}
+      >
         <h2>{article.title}</h2>
         <img className="article-image" src={article.article_img_url}></img>
 
@@ -118,6 +152,16 @@ function SingleArticle() {
           </section>
           <p>{article.body}</p>
         </section>
+        {loggedInUser === article.author && (
+          <button
+            onClick={() => handleDelete(article.article_id)}
+            disabled={deleteLoading}
+          >
+            Delete Article
+          </button>
+        )}
+        {deleteError && <p className="error">Failed to delete!</p>}
+        {deleteLoading && <p className="error">Deleting...</p>}
       </section>
       <Comments articleid={articleid} articleauthor={article.author} />
     </>

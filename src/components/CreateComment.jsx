@@ -32,10 +32,9 @@ function CreateComment({ articleid, onCommentPosted }) {
     setFormError(null);
     postComment(articleid, commentBody, loggedInUser)
       .then((data) => {
-        console.log(data);
         console.log("Comment posted:", data);
         setCommentBody("");
-        if (onCommentPosted) onCommentPosted(data.newComment);
+        onCommentPosted(data.newComment);
       })
       .catch((err) => {
         setError(err.message);

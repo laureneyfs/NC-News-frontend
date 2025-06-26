@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useParams, useSearchParams } from "react-router-dom";
 import ArticleFilter from "../components/ArticleFilter";
 import { UserContext } from "../contexts/UserContext";
-import { patchArticle, fetchArticles } from "../api/api";
+import { patchArticle, fetchArticles, deleteArticle } from "../api/api";
 import { computeVoteUpdate } from "../utils/voting";
 
 function AllArticles() {
@@ -15,6 +15,8 @@ function AllArticles() {
   const [sortBy, setSortBy] = useState("");
   const [order, setOrder] = useState("");
   const [page, setPage] = useState(1);
+  const [deletingArticles, setDeletingArticles] = useState([]);
+  const [deleteError, setDeleteError] = useState(null);
   const { loggedInUser } = useContext(UserContext);
   const topicFromQuery = searchParams.get("topic");
   const paramsFromPath = useParams();
@@ -149,6 +151,23 @@ function AllArticles() {
     );
   }
 
+  function handleDelete(article_id) {
+    setDeletingArticles((prev) => [...prev, article_id]);
+    setDeleteError(null);
+    deleteArticle(article_id)
+      .then(() => {
+        setArticles((prevArticles) =>
+          prevArticles.filter((article) => article.article_id !== article_id)
+        );
+      })
+      .catch(() => {
+        setDeleteError("Failed to delete article.");
+      })
+      .finally(() => {
+        setDeletingArticles((prev) => prev.filter((id) => id !== article_id));
+      });
+  }
+
   return (
     <>
       {paramTopic && (
@@ -164,7 +183,12 @@ function AllArticles() {
         onSubmit={handleFilterForm}
       />
       {articles.map((article) => (
-        <section className="article" key={article.article_id}>
+        <section
+          className={`article ${
+            deletingArticles.includes(article.article_id) ? "deleting" : ""
+          }`}
+          key={article.article_id}
+        >
           <section className="vote-block">
             <button
               onClick={() => handleVote(article.article_id, 1)}
@@ -217,6 +241,16 @@ function AllArticles() {
               {new Date(article.created_at).toLocaleString()}
             </p>
             <p>{article.comment_count} comments</p>
+            {loggedInUser?.username === article.author && (
+              <button
+                onClick={() => handleDelete(article.article_id)}
+                disabled={deletingArticles.includes(article.article_id)}
+              >
+                {deletingArticles.includes(article.article_id)
+                  ? "Deleting..."
+                  : "Delete"}
+              </button>
+            )}
           </section>
         </section>
       ))}

@@ -58,7 +58,14 @@ export function deleteComment(commentId) {
   return fetch(`${baseUrl}/comments/${commentId}`, {
     method: "DELETE",
   }).then((res) => {
-    if (!res.ok) throw new Error("vote failed!");
+    if (!res.ok) throw new Error("comment deletion failed!");
+  });
+}
+export function deleteArticle(articleId) {
+  return fetch(`${baseUrl}/articles/${articleId}`, {
+    method: "DELETE",
+  }).then((res) => {
+    if (!res.ok) throw new Error("Article deletion failed!");
   });
 }
 

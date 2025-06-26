@@ -332,3 +332,24 @@ textarea {
   font-size: 12px;
   text-align: center;
 }
+
+.specific-article-item.deleting {
+  opacity: 0.5;
+  pointer-events: none;
+  position: relative;
+}
+.specific-article-item.deleting {
+  opacity: 0.5;
+  pointer-events: none;
+  position: relative;
+}
+
+.error {
+  color: var(--error-strong);
+}
+
+.article.deleting {
+  opacity: 0.5;
+  pointer-events: none;
+  position: relative;
+}
