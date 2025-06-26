@@ -36,7 +36,9 @@ function ArticleCard({
         </button>
         <p
           className={
-            votes < 0 ? "vote-count negative-vote-count" : "vote-count"
+            "vote-count" +
+            (votes < -4 ? " negative-vote-count" : "") +
+            (votes > 24 ? " popular-post" : "")
           }
         >
           {votes < 1000 ? votes : `${(votes / 1000).toFixed(1)}k`}

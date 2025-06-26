@@ -311,6 +311,9 @@ textarea {
 .negative-vote-count {
   color: darkred;
 }
+.popular-post {
+  color: darkgreen;
+}
 
 .page-nav {
   display: flex;
