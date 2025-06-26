@@ -353,3 +353,15 @@ textarea {
   pointer-events: none;
   position: relative;
 }
+
+.article-fields {
+  position: relative;
+  width: 100%;
+}
+
+.article-fields button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-bottom: 5px;
+}

@@ -1,22 +1,25 @@
 import { useEffect, useState, useContext } from "react";
-import { Link } from "react-router";
 import { useParams, useSearchParams } from "react-router-dom";
 import ArticleFilter from "../components/ArticleFilter";
 import { UserContext } from "../contexts/UserContext";
 import { patchArticle, fetchArticles, deleteArticle } from "../api/api";
 import { computeVoteUpdate } from "../utils/voting";
+import ArticleCard from "../components/ArticleCard";
+import Pagination from "../components/PaginationControls";
+import { buildSearchParams } from "../utils/buildSearchParams";
 
 function AllArticles() {
   const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [articles, setArticles] = useState([]);
+  const [fetchedArticles, setFetchedArticles] = useState([]);
   const [loadingArticles, setLoadingArticles] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [sortBy, setSortBy] = useState("");
   const [order, setOrder] = useState("");
   const [page, setPage] = useState(1);
   const [deletingArticles, setDeletingArticles] = useState([]);
-  const [deleteError, setDeleteError] = useState(null);
+  const [deleteErrors, setDeleteErrors] = useState({});
   const { loggedInUser } = useContext(UserContext);
   const topicFromQuery = searchParams.get("topic");
   const paramsFromPath = useParams();
@@ -51,7 +54,7 @@ function AllArticles() {
 
     fetchArticles(queryParams)
       .then((data) => {
-        setArticles(
+        setFetchedArticles(
           data.articles.map((article) => ({ ...article, userVote: 0 }))
         );
         setError(null);
@@ -63,6 +66,12 @@ function AllArticles() {
         setLoading(false);
       });
   }, [paramTopic, paramSortBy, paramOrder, paramP]);
+
+  useEffect(() => {
+    if (!isLoading && !error) {
+      setArticles(fetchedArticles);
+    }
+  }, [isLoading, error, fetchedArticles]);
 
   function handleVote(article_id, vote) {
     setLoadingArticles((ids) => [...ids, article_id]);
@@ -111,10 +120,11 @@ function AllArticles() {
 
   function handleFilterForm(e) {
     e.preventDefault();
-    const params = {};
-    if (paramTopic) params.topic = paramTopic;
-    if (sortBy) params.sort_by = sortBy;
-    if (order) params.order = order;
+    const params = buildSearchParams({
+      topic: paramTopic,
+      sortBy,
+      order,
+    });
     setSearchParams(params);
   }
 
@@ -126,7 +136,7 @@ function AllArticles() {
     );
   }
 
-  if (isLoading) {
+  if (isLoading && articles.length === 0) {
     return (
       <>
         <ArticleFilter
@@ -153,7 +163,11 @@ function AllArticles() {
 
   function handleDelete(article_id) {
     setDeletingArticles((prev) => [...prev, article_id]);
-    setDeleteError(null);
+    setDeleteErrors((prev) => {
+      const copy = { ...prev };
+      delete copy[article_id];
+      return copy;
+    });
     deleteArticle(article_id)
       .then(() => {
         setArticles((prevArticles) =>
@@ -161,7 +175,10 @@ function AllArticles() {
         );
       })
       .catch(() => {
-        setDeleteError("Failed to delete article.");
+        setDeleteErrors((prev) => ({
+          ...prev,
+          [article_id]: "Failed to delete article.",
+        }));
       })
       .finally(() => {
         setDeletingArticles((prev) => prev.filter((id) => id !== article_id));
@@ -183,114 +200,25 @@ function AllArticles() {
         onSubmit={handleFilterForm}
       />
       {articles.map((article) => (
-        <section
-          className={`article ${
-            deletingArticles.includes(article.article_id) ? "deleting" : ""
-          }`}
+        <ArticleCard
           key={article.article_id}
-        >
-          <section className="vote-block">
-            <button
-              onClick={() => handleVote(article.article_id, 1)}
-              disabled={
-                loggedInUser?.username === article.author ||
-                loadingArticles.includes(article.article_id)
-              }
-              className={article.userVote === 1 ? "upvoted" : ""}
-            >
-              ↑
-            </button>
-            <p
-              className={
-                article.votes < 0
-                  ? "vote-count negative-vote-count"
-                  : "vote-count"
-              }
-            >
-              {article.votes < 1000
-                ? article.votes
-                : `${article.votes / 1000}k`}
-            </p>
-            <button
-              onClick={() => handleVote(article.article_id, -1)}
-              disabled={
-                loggedInUser?.username === article.author ||
-                loadingArticles.includes(article.article_id)
-              }
-              className={article.userVote === -1 ? "downvoted" : ""}
-            >
-              ↓
-            </button>
-          </section>
-          <img
-            className="all-articles-image"
-            src={article.article_img_url}
-            alt={article.title}
-          />
-          <section className="article-fields">
-            <h3>
-              <Link to={`/articles/${article.article_id}`}>
-                {article.title}
-              </Link>{" "}
-              by <Link to={`/users/${article.author}`}>{article.author}</Link>
-            </h3>
-            <p>
-              <span className="article-key">topic:</span>{" "}
-              <Link to={`/topics/${article.topic}`}>{article.topic}</Link> |{" "}
-              <span className="article-key">posted:</span>{" "}
-              {new Date(article.created_at).toLocaleString()}
-            </p>
-            <p>{article.comment_count} comments</p>
-            {loggedInUser?.username === article.author && (
-              <button
-                onClick={() => handleDelete(article.article_id)}
-                disabled={deletingArticles.includes(article.article_id)}
-              >
-                {deletingArticles.includes(article.article_id)
-                  ? "Deleting..."
-                  : "Delete"}
-              </button>
-            )}
-          </section>
-        </section>
+          article={article}
+          isDeleting={deletingArticles.includes(article.article_id)}
+          isVoting={loadingArticles.includes(article.article_id)}
+          onVote={handleVote}
+          onDelete={handleDelete}
+          currentUser={loggedInUser}
+          deleteError={deleteErrors[article.article_id]}
+        />
       ))}
-      <section className="page-nav">
-        <button
-          id="prev-page"
-          disabled={page === 1}
-          onClick={() => {
-            const newPage = page - 1;
-            setSearchParams((prev) => {
-              const params = new URLSearchParams(prev);
-              params.set("p", newPage);
-              if (sortBy) params.set("sort_by", sortBy);
-              if (order) params.set("order", order);
-              if (paramTopic) params.set("topic", paramTopic);
-              return params;
-            });
-          }}
-        >
-          Previous Page
-        </button>
-        <p id="page-number">Page: {page}</p>
-        <button
-          id="next-page"
-          disabled={articles.length !== 10}
-          onClick={() => {
-            const newPage = page + 1;
-            setSearchParams((prev) => {
-              const params = new URLSearchParams(prev);
-              params.set("p", newPage);
-              if (sortBy) params.set("sort_by", sortBy);
-              if (order) params.set("order", order);
-              if (paramTopic) params.set("topic", paramTopic);
-              return params;
-            });
-          }}
-        >
-          Next Page
-        </button>
-      </section>
+      <Pagination
+        page={page}
+        setSearchParams={setSearchParams}
+        sortBy={sortBy}
+        order={order}
+        paramTopic={paramTopic}
+        articles={articles}
+      />
     </>
   );
 }
