@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect } from "react";
 import { UserContext } from "../contexts/UserContext";
 import { useNavigate } from "react-router";
+import { fetchAllUsers } from "../api/api";
 
 function Login() {
   const [users, setUsers] = useState([]);
@@ -9,29 +10,26 @@ function Login() {
   const { loggedInUser, setLoggedInUser } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const fetchAllUsers = async () => {
-    try {
-      setLoadingUsers(true);
-      const res = await fetch(`https://nc-news-3uk2.onrender.com/api/users/`);
-      if (!res.ok) throw new Error("Failed to fetch user");
-      const data = await res.json();
-      console.log(data.users[0]);
-      setUsers(data.users.slice(0, 3));
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoadingUsers(false);
-    }
-  };
   useEffect(() => {
-    fetchAllUsers();
+    setLoadingUsers(true);
+    fetchAllUsers()
+      .then((data) => {
+        setUsers(data.users.slice(0, 3));
+        setError(null);
+      })
+      .catch((err) => {
+        setError(err.message);
+      })
+      .finally(() => {
+        setLoadingUsers(false);
+      });
   }, []);
 
   const handleLogin = (user) => {
     setLoggedInUser(user);
     navigate(-1);
   };
+
   return (
     <>
       <h2>Choose user to log in as</h2>

@@ -3,6 +3,8 @@ import { useParams } from "react-router";
 import Comments from "../components/ArticleComments";
 import { Link } from "react-router";
 import { UserContext } from "../contexts/UserContext";
+import { patchArticle, fetchArticleById } from "../api/api";
+import { computeVoteUpdate } from "../utils/voting";
 
 function SingleArticle() {
   const [article, setArticle] = useState(null);
@@ -10,73 +12,51 @@ function SingleArticle() {
   const [error, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const { loggedInUser } = useContext(UserContext);
+  const [isVoting, setIsVoting] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(
-          `https://nc-news-3uk2.onrender.com/api/articles/${articleid}`
-        );
-        if (!res.ok) throw new Error("Failed to fetch article");
-
-        const data = await res.json();
+    setLoading(true);
+    fetchArticleById(articleid)
+      .then((data) => {
         setArticle(data.article);
         setError(null);
-      } catch (err) {
+      })
+      .catch((err) => {
         setError(err.message);
-      } finally {
+      })
+      .finally(() => {
         setLoading(false);
-      }
-    };
-
-    fetchData();
+      });
   }, [articleid]);
 
-  function patchArticle(article_id, voteChange) {
-    return fetch(
-      `https://nc-news-3uk2.onrender.com/api/articles/${article_id}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify({ inc_votes: voteChange }),
-        headers: { "Content-type": "application/json" },
-      }
-    )
-      .then((res) => {
-        if (!res.ok) throw new Error("vote failed!");
-        return res.json();
-      })
-      .catch(() => {
-        setArticle((currArticle) =>
-          currArticle.map((article) =>
-            article.article_id === article_id
-              ? { ...article, votes: article.votes - voteChange, userVote: 0 }
-              : article
-          )
-        );
-      });
-  }
   function handleVote(article_id, vote) {
-    setArticle(() => {
-      let newUserVote = article.userVote || 0;
-      let voteChange = 0;
-      if (vote === newUserVote) {
-        voteChange -= vote;
-        newUserVote = 0;
-      } else if (newUserVote === 0) {
-        voteChange = vote;
-        newUserVote = vote > 0 ? 1 : -1;
-      } else {
-        voteChange = vote * 2;
-        newUserVote = vote > 0 ? 1 : -1;
-      }
-      patchArticle(article_id, voteChange);
-      return {
-        ...article,
-        votes: article.votes + voteChange,
-        userVote: newUserVote,
-      };
-    });
+    setIsVoting(true);
+
+    const { voteChange, newUserVote } = computeVoteUpdate(
+      article.userVote,
+      vote
+    );
+
+    const optimisticArticle = {
+      ...article,
+      votes: article.votes + voteChange,
+      userVote: newUserVote,
+    };
+
+    setArticle(optimisticArticle);
+
+    patchArticle(article_id, voteChange)
+      .catch(() => {
+        setArticle({
+          ...article,
+          userVote: article.userVote || 0,
+          votes: article.votes,
+        });
+        setError("Failed to register vote :(");
+      })
+      .finally(() => {
+        setIsVoting(false);
+      });
   }
 
   if (error) {
@@ -118,7 +98,9 @@ function SingleArticle() {
           <section className="vote-block">
             <button
               onClick={() => handleVote(article.article_id, 1)}
-              disabled={loggedInUser?.username === article.author}
+              disabled={
+                loggedInUser?.username === article.author || isVoting === true
+              }
               className={article.userVote === 1 ? "upvoted" : ""}
             >
               ↑
@@ -126,7 +108,9 @@ function SingleArticle() {
             <p>{article.votes}</p>
             <button
               onClick={() => handleVote(article.article_id, -1)}
-              disabled={loggedInUser?.username === article.author}
+              disabled={
+                loggedInUser?.username === article.author || isVoting === true
+              }
               className={article.userVote === -1 ? "downvoted" : ""}
             >
               ↓

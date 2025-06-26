@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
+import { fetchTopics } from "../api/api";
 
 function Topics() {
   const [isLoading, setLoading] = useState(true);
@@ -7,21 +8,18 @@ function Topics() {
   const [topics, setTopics] = useState([]);
 
   useEffect(() => {
-    const fetchTopics = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(`https://nc-news-3uk2.onrender.com/api/topics`);
-        if (!res.ok) throw new Error("Something went wrong!");
-        const data = await res.json();
+    setLoading(true);
+    fetchTopics()
+      .then((data) => {
         setTopics(data.topics);
         setError(null);
-      } catch (err) {
+      })
+      .catch((err) => {
         setError(err.message);
-      } finally {
+      })
+      .finally(() => {
         setLoading(false);
-      }
-    };
-    fetchTopics();
+      });
   }, []);
   if (error) {
     return (

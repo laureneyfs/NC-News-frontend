@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import { UserContext } from "../contexts/UserContext";
 import { useNavigate } from "react-router";
+import { postComment } from "../api/api";
 
 function CreateComment({ articleid, onCommentPosted }) {
   const [commentBody, setCommentBody] = useState("");
@@ -18,7 +19,7 @@ function CreateComment({ articleid, onCommentPosted }) {
     e.preventDefault();
     setLoadingComments(true);
     setError(null);
-    postComment()
+    postComment(articleid, commentBody, loggedInUser)
       .then((data) => {
         console.log(data);
         console.log("Comment posted:", data);
@@ -29,24 +30,6 @@ function CreateComment({ articleid, onCommentPosted }) {
         setError(err.message);
       })
       .finally(() => setLoadingComments(false));
-  }
-
-  function postComment() {
-    return fetch(
-      `https://nc-news-3uk2.onrender.com/api/articles/${articleid}/comments`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          article_id: articleid,
-          body: commentBody,
-          username: loggedInUser.username,
-        }),
-        headers: { "Content-type": "application/json" },
-      }
-    ).then((res) => {
-      if (!res.ok) throw new Error("post failed!");
-      return res.json();
-    });
   }
 
   return (

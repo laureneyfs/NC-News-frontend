@@ -4,6 +4,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import ArticleFilter from "../components/ArticleFilter";
 import { UserContext } from "../contexts/UserContext";
 import { patchArticle, fetchArticles } from "../api/api";
+import { computeVoteUpdate } from "../utils/voting";
 
 function AllArticles() {
   const [isLoading, setLoading] = useState(true);
@@ -67,19 +68,10 @@ function AllArticles() {
       currArticles.map((article) => {
         if (article.article_id !== article_id) return article;
 
-        let newUserVote = article.userVote || 0;
-        let voteChange = 0;
-
-        if (vote === newUserVote) {
-          voteChange -= vote;
-          newUserVote = 0;
-        } else if (newUserVote === 0) {
-          voteChange = vote;
-          newUserVote = vote > 0 ? 1 : -1;
-        } else {
-          voteChange = vote * 2;
-          newUserVote = vote > 0 ? 1 : -1;
-        }
+        const { voteChange, newUserVote } = computeVoteUpdate(
+          article.userVote,
+          vote
+        );
 
         return {
           ...article,

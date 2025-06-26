@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { Link } from "react-router";
 import CreateComment from "./CreateComment";
 import { UserContext } from "../contexts/UserContext";
+import { patchComment, deleteComment, fetchComments } from "../api/api";
 
 function Comments({ articleid, articleauthor }) {
   const [comments, setComments] = useState([]);
@@ -11,25 +12,20 @@ function Comments({ articleid, articleauthor }) {
   const { loggedInUser } = useContext(UserContext);
 
   useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(
-          `https://nc-news-3uk2.onrender.com/api/articles/${articleid}/comments`
-        );
-        if (!res.ok) throw new Error("Failed to fetch comments");
-        const data = await res.json();
+    setLoading(true);
+    fetchComments(articleid)
+      .then((data) => {
         setComments(
           data.comments.map((comment) => ({ ...comment, userVote: 0 }))
         );
         setError(null);
-      } catch (err) {
+      })
+      .catch((err) => {
         setError(err.message);
-      } finally {
+      })
+      .finally(() => {
         setLoading(false);
-      }
-    };
-    fetchComments();
+      });
   }, [articleid]);
 
   if (error) {
@@ -45,38 +41,6 @@ function Comments({ articleid, articleauthor }) {
         <p>Loading comments...</p>
       </section>
     );
-  }
-
-  function patchComment(comment_id, vote) {
-    setLoadingComments((ids) => [...ids, comment_id]);
-    return fetch(
-      `https://nc-news-3uk2.onrender.com/api/comments/${comment_id}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify({ inc_votes: vote }),
-        headers: { "Content-type": "application/json" },
-      }
-    )
-      .then((res) => {
-        if (!res.ok) throw new Error("vote failed!");
-        return res.json();
-      })
-      .catch(() => {
-        setComments((currComments) =>
-          currComments.map((comment) =>
-            comment.comment_id === comment_id
-              ? {
-                  ...comment,
-                  votes: comment.votes - vote,
-                  userVote: comment.userVote,
-                }
-              : comment
-          )
-        );
-      })
-      .finally(() => {
-        setLoadingComments((ids) => ids.filter((id) => id !== comment_id));
-      });
   }
 
   function handleVote(comment_id, vote) {
@@ -95,7 +59,24 @@ function Comments({ articleid, articleauthor }) {
           voteChange = vote * 2;
           newUserVote = vote > 0 ? 1 : -1;
         }
-        patchComment(comment_id, voteChange);
+        setLoadingComments((ids) => [...ids, comment_id]);
+        patchComment(comment_id, voteChange)
+          .catch(() => {
+            setComments((currComments) =>
+              currComments.map((comment) =>
+                comment.comment_id === comment_id
+                  ? {
+                      ...comment,
+                      votes: comment.votes - vote,
+                      userVote: comment.userVote,
+                    }
+                  : comment
+              )
+            );
+          })
+          .finally(() => {
+            setLoadingComments((ids) => ids.filter((id) => id !== comment_id));
+          });
         return {
           ...comment,
           votes: comment.votes + voteChange,
@@ -105,7 +86,7 @@ function Comments({ articleid, articleauthor }) {
     );
   }
 
-  function deleteComment(comment_id) {
+  function handleDelete(comment_id) {
     setComments((curr) =>
       curr.map((comment) =>
         comment.comment_id === comment_id
@@ -113,20 +94,21 @@ function Comments({ articleid, articleauthor }) {
           : comment
       )
     );
-    return fetch(
-      `https://nc-news-3uk2.onrender.com/api/comments/${comment_id}`,
-      {
-        method: "DELETE",
-      }
-    )
-      .then((res) => {
-        if (!res.ok) throw new Error("vote failed!");
+    deleteComment(comment_id)
+      .then(() => {
         setComments((currComments) =>
           currComments.filter((comment) => comment.comment_id !== comment_id)
         );
       })
+
       .catch((err) => {
-        return <p>Error deleting comment: {err}</p>;
+        setComments((curr) =>
+          curr.map((comment) =>
+            comment.comment_id === comment_id
+              ? { ...comment, deleting: false, error: "Failed to delete" }
+              : comment
+          )
+        );
       });
   }
 
@@ -184,7 +166,7 @@ function Comments({ articleid, articleauthor }) {
                 {loggedInUser?.username === comment.author &&
                   !comment.deleting && (
                     <button
-                      onClick={() => deleteComment(comment.comment_id)}
+                      onClick={() => handleDelete(comment.comment_id)}
                       className="delete-comment"
                       disabled={comment.deleting}
                     >

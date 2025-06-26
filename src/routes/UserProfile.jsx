@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { fetchArticlesByUsername, fetchUserByUsername } from "../api/api";
 
 function UserProfile() {
   const [user, setUser] = useState(null);
@@ -11,51 +12,33 @@ function UserProfile() {
   const [articlesError, setArticlesError] = useState(null);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        setLoadingUser(true);
-        const res = await fetch(
-          `https://nc-news-3uk2.onrender.com/api/users/${username}`
-        );
-        if (res.status === 404) {
-          throw new Error("User does not exist");
-        } else if (!res.ok)
-          throw new Error("Something went wrong - error fetching user!");
-        const data = await res.json();
+    setLoadingUser(true);
+    fetchUserByUsername(username)
+      .then((data) => {
         setUser(data.user);
         setError(null);
-      } catch (err) {
+      })
+      .catch((err) => {
         setError(err.message);
-      } finally {
+      })
+      .finally(() => {
         setLoadingUser(false);
-      }
-    };
-
-    fetchUser();
+      });
   }, [username]);
 
   useEffect(() => {
-    const fetchArticlesByUser = async () => {
-      try {
-        setLoadingArticles(true);
-        const res = await fetch(
-          `https://nc-news-3uk2.onrender.com/api/articles?author=${username}`
-        );
-        if (!res.ok)
-          throw new Error(
-            "Failed to fetch articles - are you sure the user exists?"
-          );
-        const data = await res.json();
+    setLoadingArticles(true);
+    fetchArticlesByUsername(username)
+      .then((data) => {
         setArticles(data.articles);
         setArticlesError(null);
-      } catch (err) {
+      })
+      .catch((err) => {
         setArticlesError(err.message);
-      } finally {
+      })
+      .finally(() => {
         setLoadingArticles(false);
-      }
-    };
-
-    fetchArticlesByUser();
+      });
   }, [username]);
 
   if (error)
