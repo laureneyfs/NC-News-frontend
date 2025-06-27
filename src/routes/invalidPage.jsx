@@ -1,12 +1,12 @@
 import { useNavigate } from "react-router";
+import { Error } from "../components/Error";
 
 function InvalidPage() {
   const navigate = useNavigate();
   return (
-    <section className="error-block">
-      <h2>Invalid Page!</h2>
+    <Error message="invalid page">
       <button onClick={() => navigate(`/`)}>Back to Home</button>
-    </section>
+    </Error>
   );
 }
 

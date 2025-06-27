@@ -6,12 +6,13 @@ import { UserContext } from "../contexts/UserContext";
 import { patchArticle, fetchArticleById, deleteArticle } from "../api/api";
 import { computeVoteUpdate } from "../utils/voting";
 import { useNavigate } from "react-router";
+import { useFetch } from "../hooks/useFetch";
+import { Loading } from "../components/Loading";
+import { Error } from "../components/Error";
 
 function SingleArticle() {
   const [article, setArticle] = useState(null);
   const { articleid } = useParams();
-  const [error, setError] = useState(null);
-  const [isLoading, setLoading] = useState(false);
   const { loggedInUser } = useContext(UserContext);
   const [isVoting, setIsVoting] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
@@ -19,20 +20,17 @@ function SingleArticle() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const navigate = useNavigate();
 
+  const { data, error, loading } = useFetch(
+    fetchArticleById,
+    [articleid],
+    [articleid]
+  );
+
   useEffect(() => {
-    setLoading(true);
-    fetchArticleById(articleid)
-      .then((data) => {
-        setArticle(data.article);
-        setError(null);
-      })
-      .catch((err) => {
-        setError(err.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [articleid]);
+    if (data) {
+      setArticle(data.article);
+    }
+  }, [data]);
 
   function handleDelete(article_id) {
     setDeleteLoading(true);
@@ -92,18 +90,11 @@ function SingleArticle() {
     );
   }
   if (error) {
-    return (
-      <section className="article">
-        <h2 className="error">Error: {error}</h2>
-      </section>
-    );
+    return <Error message={error} />;
   }
-  if (isLoading) {
-    return (
-      <section className="article">
-        <h2>Loading article...</h2>
-      </section>
-    );
+
+  if (loading) {
+    return <Loading field={"article"} />;
   }
   if (!article) {
     return (

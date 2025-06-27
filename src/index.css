@@ -383,3 +383,32 @@ textarea {
   text-decoration: none;
   color: inherit;
 }
+
+.loading-card {
+  justify-self: center;
+  border: 1px solid black;
+  margin: 8px;
+  padding: 8px;
+  border-radius: 5px;
+  max-width: 90%;
+  color: rgb(104, 104, 104);
+}
+
+.error-card {
+  justify-self: center;
+  justify-items: center;
+  border: 1px solid black;
+  margin: 8px;
+  padding: 8px;
+  border-radius: 5px;
+  max-width: 90%;
+  color: var(--error-strong);
+}
+
+.profile-fields {
+  margin: 8px;
+}
+
+.profile-key {
+  font-weight: bold;
+}

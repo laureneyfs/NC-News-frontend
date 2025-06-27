@@ -2,6 +2,8 @@ import { useState, useContext, useEffect } from "react";
 import { UserContext } from "../contexts/UserContext";
 import { useNavigate } from "react-router";
 import { fetchAllUsers } from "../api/api";
+import { Loading } from "../components/Loading";
+import { Error } from "../components/Error";
 
 function Login() {
   const [users, setUsers] = useState([]);
@@ -33,15 +35,18 @@ function Login() {
   return (
     <>
       <h2>Choose user to log in as</h2>
+      <>{loadingUsers && <Loading field={"users..."} />}</>
       <section className="user-wrapper">
-        {loadingUsers && (
-          <section className="user-profile">
-            <p>Loading users...</p>
-          </section>
-        )}
         {loggedInUser && (
           <section className="user-profile">
-            <p>Already logged in as: {loggedInUser.username}</p>
+            <Error message={`Already logged in as: ${loggedInUser.username}`} />
+            <button
+              onClick={() => {
+                setLoggedInUser(null);
+              }}
+            >
+              Log Out
+            </button>
           </section>
         )}
         {!loadingUsers &&

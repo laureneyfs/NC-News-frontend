@@ -7,12 +7,11 @@ import { computeVoteUpdate } from "../utils/voting";
 import ArticleCard from "../components/ArticleCard";
 import Pagination from "../components/PaginationControls";
 import { buildSearchParams } from "../utils/buildSearchParams";
+import { useFetch } from "../hooks/useFetch";
+import { Loading } from "../components/Loading";
 
 function AllArticles() {
-  const [isLoading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [articles, setArticles] = useState([]);
-  const [fetchedArticles, setFetchedArticles] = useState([]);
   const [loadingArticles, setLoadingArticles] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [sortBy, setSortBy] = useState("");
@@ -43,35 +42,26 @@ function AllArticles() {
     setPage(pageNumber > 0 ? pageNumber : 1);
   }, [paramSortBy, paramOrder, paramP]);
 
-  useEffect(() => {
-    setLoading(true);
-    const queryParams = {
-      topic: paramTopic,
-      order: paramOrder,
-      sort_by: paramSortBy,
-      p: paramP,
-    };
+  const queryParams = {
+    topic: paramTopic,
+    order: paramOrder,
+    sort_by: paramSortBy,
+    p: paramP,
+  };
 
-    fetchArticles(queryParams)
-      .then((data) => {
-        setFetchedArticles(
-          data.articles.map((article) => ({ ...article, userVote: 0 }))
-        );
-        setError(null);
-      })
-      .catch((err) => {
-        setError(err.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [paramTopic, paramSortBy, paramOrder, paramP]);
+  const { data, error, loading } = useFetch(
+    fetchArticles,
+    [queryParams],
+    [paramTopic, paramSortBy, paramOrder, paramP]
+  );
 
   useEffect(() => {
-    if (!isLoading && !error) {
-      setArticles(fetchedArticles);
+    if (data) {
+      setArticles(
+        data.articles.map((article) => ({ ...article, userVote: 0 }))
+      );
     }
-  }, [isLoading, error, fetchedArticles]);
+  }, [data]);
 
   function handleVote(article_id, vote) {
     setLoadingArticles((ids) => [...ids, article_id]);
@@ -129,14 +119,10 @@ function AllArticles() {
   }
 
   if (error) {
-    return (
-      <section className="article">
-        <p>Error: {error}</p>
-      </section>
-    );
+    return <Error message={error} />;
   }
 
-  if (isLoading && articles.length === 0) {
+  if (loading && articles.length === 0) {
     return (
       <>
         <ArticleFilter
@@ -146,9 +132,7 @@ function AllArticles() {
           onOrderChange={handleOrder}
           onSubmit={handleFilterForm}
         />
-        <section className="article">
-          <p>Loading articles...</p>
-        </section>
+        <Loading field={"articles..."} />;
       </>
     );
   }

@@ -8,48 +8,47 @@ import {
 import ArticleCard from "../components/ArticleCard";
 import { UserContext } from "../contexts/UserContext";
 import { computeVoteUpdate } from "../utils/voting";
+import { Loading } from "../components/Loading";
+import { Error } from "../components/Error";
+import { useFetch } from "../hooks/useFetch";
 
 function UserProfile() {
+  const { username } = useParams();
+  const { loggedInUser } = useContext(UserContext);
+
+  const {
+    data: userData,
+    error: userError,
+    loading: isLoadingUser,
+  } = useFetch(fetchUserByUsername, [username], [username]);
+
+  const {
+    data: articlesData,
+    error: articlesError,
+    loading: isLoadingArticles,
+  } = useFetch(fetchArticlesByUsername, [username], [username]);
+
   const [user, setUser] = useState(null);
   const [articles, setArticles] = useState([]);
-  const { username } = useParams();
-  const [error, setError] = useState(null);
-  const [isLoadingUser, setLoadingUser] = useState(true);
-  const [isLoadingArticles, setLoadingArticles] = useState(false);
-  const [articlesError, setArticlesError] = useState(null);
-  const [votingArticleIds, setVotingArticleIds] = useState([]);
-  const { loggedInUser } = useContext(UserContext);
   const [pageStart, setPageStart] = useState(0);
+  const [error, setError] = useState(null);
+  const [votingArticleIds, setVotingArticleIds] = useState([]);
+  const [articleKarma, setArticleKarma] = useState(0);
 
   useEffect(() => {
-    setLoadingUser(true);
-    fetchUserByUsername(username)
-      .then((data) => {
-        setUser(data.user);
-        setError(null);
-      })
-      .catch((err) => {
-        setError(err.message);
-      })
-      .finally(() => {
-        setLoadingUser(false);
-      });
-  }, [username]);
+    if (userData) {
+      setUser(userData.user);
+    }
+  }, [userData]);
 
   useEffect(() => {
-    setLoadingArticles(true);
-    fetchArticlesByUsername(username)
-      .then((data) => {
-        setArticles(data.articles);
-        setArticlesError(null);
-      })
-      .catch((err) => {
-        setArticlesError(err.message);
-      })
-      .finally(() => {
-        setLoadingArticles(false);
-      });
-  }, [username]);
+    if (articlesData) {
+      setArticles(articlesData.articles);
+      setArticleKarma(
+        articlesData.articles.reduce((acc, obj) => acc + obj.votes, 0)
+      );
+    }
+  }, [articlesData]);
 
   const handleVote = (article_id, vote) => {
     const article = articles.find(
@@ -64,8 +63,8 @@ function UserProfile() {
 
     const originalArticle = { ...article };
 
-    setArticles((currArticles) =>
-      currArticles.map((article) =>
+    setArticles((curr) =>
+      curr.map((article) =>
         article.article_id === article_id
           ? {
               ...article,
@@ -75,31 +74,32 @@ function UserProfile() {
           : article
       )
     );
+    setArticleKarma((prev) => prev + voteChange);
 
     setVotingArticleIds((prev) => [...prev, article_id]);
 
     patchArticle(article_id, voteChange)
       .catch(() => {
-        setArticles((currArticles) =>
-          currArticles.map((article) =>
+        setArticles((curr) =>
+          curr.map((article) =>
             article.article_id === article_id ? originalArticle : article
           )
         );
         setError("Failed to register vote :(");
+        setArticleKarma((prev) => prev - voteChange);
       })
       .finally(() => {
         setVotingArticleIds((prev) => prev.filter((id) => id !== article_id));
       });
   };
 
-  if (error)
-    return (
-      <section className="error-block">
-        <p>Error: {error}</p>
-      </section>
-    );
+  if (userError || error) {
+    return <Error message={userError || error} />;
+  }
 
-  if (isLoadingUser) return <p>Loading user profile...</p>;
+  if (isLoadingUser) {
+    return <Loading field={"user profile..."} />;
+  }
 
   return (
     <>
@@ -112,7 +112,16 @@ function UserProfile() {
           />
           <section className="profile-fields">
             <h2>{user.username}</h2>
-            <p>Name: {user.name}</p>
+            <p>
+              <span className="profile-key">Name:</span> {user.name}
+            </p>
+            <p>
+              <span className="profile-key">Articles Posted:</span>{" "}
+              {articles.length}
+            </p>
+            <p>
+              <span className="profile-key">Article Karma:</span> {articleKarma}
+            </p>
           </section>
         </section>
       )}
@@ -121,8 +130,10 @@ function UserProfile() {
         <section className="user-articles">
           <h3>Articles by {user.username}</h3>
 
-          {isLoadingArticles && <p>Loading articles...</p>}
-          {articlesError && <p>Error loading articles: {articlesError}</p>}
+          {isLoadingArticles && <Loading field={"articles"} />}
+          {articlesError && (
+            <Error message={`cannot load articles, ${articlesError}`} />
+          )}
           {!isLoadingArticles && articles.length === 0 && (
             <p>No articles found.</p>
           )}

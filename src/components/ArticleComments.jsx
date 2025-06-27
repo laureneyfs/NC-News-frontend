@@ -3,6 +3,8 @@ import CreateComment from "./CreateComment";
 import { UserContext } from "../contexts/UserContext";
 import { patchComment, deleteComment, fetchComments } from "../api/api";
 import CommentCard from "./CommentCard";
+import { computeVoteUpdate } from "../utils/voting";
+import { Loading } from "./Loading";
 
 function Comments({ articleid, articleauthor }) {
   const [comments, setComments] = useState([]);
@@ -30,40 +32,50 @@ function Comments({ articleid, articleauthor }) {
 
   if (error) {
     return (
-      <section className="comments-section">
-        <p>Error loading comments: {error}</p>
-      </section>
+      <>
+        <Error message={error} />
+      </>
     );
   }
   if (isLoading) {
     return (
-      <section className="comments-section">
-        <p>Loading comments...</p>
-      </section>
+      <>
+        <Loading field={"comments"} />
+      </>
     );
   }
-
   function handleVote(comment_id, vote) {
-    setComments((currComments) =>
-      currComments.map((comment) => {
+    setComments((currComments) => {
+      const updatedComments = currComments.map((comment) => {
         if (comment.comment_id !== comment_id) return comment;
-        let newUserVote = comment.userVote || 0;
-        let voteChange = 0;
-        if (vote === newUserVote) {
-          voteChange = -vote;
-          newUserVote = 0;
-        } else if (newUserVote === 0) {
-          voteChange = vote;
-          newUserVote = vote > 0 ? 1 : -1;
-        } else {
-          voteChange = vote * 2;
-          newUserVote = vote > 0 ? 1 : -1;
-        }
+
+        const { voteChange, newUserVote } = computeVoteUpdate(
+          comment.userVote,
+          vote
+        );
+
+        return {
+          ...comment,
+          votes: comment.votes + voteChange,
+          userVote: newUserVote,
+        };
+      });
+
+      const updatedComment = updatedComments.find(
+        (comment) => comment.comment_id === comment_id
+      );
+      if (updatedComment) {
         setLoadingComments((ids) => [...ids, comment_id]);
-        patchComment(comment_id, voteChange)
+
+        patchComment(
+          comment_id,
+          updatedComment.votes -
+            currComments.find((comment) => comment.comment_id === comment_id)
+              .votes
+        )
           .catch(() => {
-            setComments((currComments) =>
-              currComments.map((comment) =>
+            setComments((curr) =>
+              curr.map((comment) =>
                 comment.comment_id === comment_id
                   ? {
                       ...comment,
@@ -77,13 +89,10 @@ function Comments({ articleid, articleauthor }) {
           .finally(() => {
             setLoadingComments((ids) => ids.filter((id) => id !== comment_id));
           });
-        return {
-          ...comment,
-          votes: comment.votes + voteChange,
-          userVote: newUserVote,
-        };
-      })
-    );
+      }
+
+      return updatedComments;
+    });
   }
 
   function handleDelete(comment_id) {

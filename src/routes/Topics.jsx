@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { fetchTopics } from "../api/api";
+import { Loading } from "../components/Loading";
+import { Error } from "../components/Error";
 
 function Topics() {
   const [isLoading, setLoading] = useState(true);
@@ -22,18 +24,10 @@ function Topics() {
       });
   }, []);
   if (error) {
-    return (
-      <section className="article">
-        <p>Error: {error}</p>
-      </section>
-    );
+    return <Error message={error} />;
   }
   if (isLoading) {
-    return (
-      <section className="article">
-        <p>Loading articles...</p>
-      </section>
-    );
+    return <Loading field={"articles..."} />;
   }
   return (
     <>
