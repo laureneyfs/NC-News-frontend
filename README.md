@@ -10,6 +10,8 @@ This repo serves as the frontend to a full-stack Reddit-style messageboard.
 
 ## Installation
 
+note: created on node v24.0.2 - earlier versions may work but haven't been tested!
+
 - fork this repo (optional, but allows for adjustments to the code)
 
 - clone your forked copy with `git clone [FORKED REPO LINK]`
