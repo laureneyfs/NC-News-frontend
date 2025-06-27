@@ -51,13 +51,13 @@ function ArticleCard({
           ↓
         </button>
       </section>
-
-      <img
-        className="all-articles-image"
-        src={article_img_url}
-        alt={title || "Article image"}
-      />
-
+      <div id="image-wrapper">
+        <img
+          className="all-articles-image"
+          src={article_img_url}
+          alt={title || "Article image"}
+        />
+      </div>
       <section className="article-fields">
         <h3>
           <Link to={`/articles/${article_id}`}>{title}</Link> by{" "}

@@ -111,7 +111,7 @@ function UserProfile() {
             alt={`${user.username} avatar`}
           />
           <section className="profile-fields">
-            <h2>{user.username}</h2>
+            <h2 className="profile-username">{user.username}</h2>
             <p>
               <span className="profile-key">Name:</span> {user.name}
             </p>
@@ -127,27 +127,28 @@ function UserProfile() {
       )}
 
       {user?.username && (
-        <section className="user-articles">
-          <h3>Articles by {user.username}</h3>
+        <>
+          <h3 className="content-descriptor">Articles by {user.username}</h3>
+          <section className="user-articles">
+            {isLoadingArticles && <Loading field={"articles"} />}
+            {articlesError && (
+              <Error message={`cannot load articles, ${articlesError}`} />
+            )}
+            {!isLoadingArticles && articles.length === 0 && (
+              <p>No articles found.</p>
+            )}
 
-          {isLoadingArticles && <Loading field={"articles"} />}
-          {articlesError && (
-            <Error message={`cannot load articles, ${articlesError}`} />
-          )}
-          {!isLoadingArticles && articles.length === 0 && (
-            <p>No articles found.</p>
-          )}
-
-          {articles.slice(pageStart, pageStart + 5).map((article) => (
-            <ArticleCard
-              key={article.article_id}
-              article={article}
-              onVote={handleVote}
-              isVoting={votingArticleIds.includes(article.article_id)}
-              currentUser={loggedInUser}
-            />
-          ))}
-        </section>
+            {articles.slice(pageStart, pageStart + 5).map((article) => (
+              <ArticleCard
+                key={article.article_id}
+                article={article}
+                onVote={handleVote}
+                isVoting={votingArticleIds.includes(article.article_id)}
+                currentUser={loggedInUser}
+              />
+            ))}
+          </section>
+        </>
       )}
 
       <section className="page-nav">

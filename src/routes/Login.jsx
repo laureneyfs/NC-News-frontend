@@ -34,7 +34,7 @@ function Login() {
 
   return (
     <>
-      <h2>Choose user to log in as</h2>
+      <h2 id="content-descriptor">Choose user to log in as</h2>
       <>{loadingUsers && <Loading field={"users..."} />}</>
       <section className="user-wrapper">
         {loggedInUser && (
@@ -58,8 +58,10 @@ function Login() {
                 src={user.avatar_url}
                 alt={user.username}
               />
-              <h3>{user.username}</h3>
-              <button onClick={() => handleLogin(user)}>Log in</button>
+              <div className="login-fields">
+                <h3>{user.username}</h3>
+                <button onClick={() => handleLogin(user)}>Log in</button>
+              </div>
             </section>
           ))}
       </section>
