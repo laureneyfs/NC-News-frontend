@@ -43,31 +43,37 @@ function CreateComment({ articleid, onCommentPosted }) {
   }
 
   return (
-    <section className="comments-section">
+    <>
       {loggedInUser ? (
-        <form onSubmit={handleSubmit}>
-          <h3>Reply to article</h3>
-          <textarea
-            name="postContent"
-            rows={5}
-            cols={50}
-            value={commentBody}
-            onChange={changeComment}
-          />
-          {formError && (
-            <p className="error">You cannot post a blank comment!</p>
-          )}
-          <button type="submit" disabled={loadingComments}>
-            Submit
-          </button>
-        </form>
+        <section className="create-comment">
+          <h3 className="content-descriptor">Reply to article</h3>
+          <form onSubmit={handleSubmit}>
+            <div className="field-and-submit">
+              <textarea
+                name="postContent"
+                rows={5}
+                cols={50}
+                value={commentBody}
+                onChange={changeComment}
+              />
+              {formError && (
+                <p className="error">You cannot post a blank comment!</p>
+              )}
+              <button type="submit" disabled={loadingComments}>
+                Submit
+              </button>
+            </div>
+          </form>
+        </section>
       ) : (
-        <>
-          <h4>Log in to reply to article</h4>
-          <button onClick={() => navigate(`/login`)}>Log in</button>
-        </>
+        <section
+          onClick={() => navigate(`/login`)}
+          className="create-comment clickable"
+        >
+          <h4 className="content-descriptor">Log in to reply to article</h4>
+        </section>
       )}
-    </section>
+    </>
   );
 }
 

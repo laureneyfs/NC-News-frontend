@@ -172,7 +172,7 @@ function AllArticles() {
   return (
     <>
       {paramTopic && (
-        <h2 id="topic-text">
+        <h2 className="content-descriptor">
           Displaying articles about <span id="topic-name">{paramTopic}</span>
         </h2>
       )}

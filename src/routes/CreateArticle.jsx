@@ -64,7 +64,7 @@ function CreateArticle() {
   }
   return (
     <section id="create-article">
-      <h2>Create an Article</h2>
+      <h2 className="content-descriptor">Create an Article</h2>
       {loggedInUser ? (
         <form onSubmit={handleSubmit}>
           <label htmlFor="article-title">Title</label>
@@ -94,10 +94,10 @@ function CreateArticle() {
             onChange={handleChange}
           />
           {formErrors.image && <p className="error">{formErrors.image}</p>}
-          <label htmlFor="article-body">Body</label>
+          <label htmlFor="create-article-body">Body</label>
           <textarea
             name="body"
-            id="article-body"
+            id="create-article-body"
             rows="5"
             cols="33"
             value={formData.body}
@@ -109,7 +109,7 @@ function CreateArticle() {
         </form>
       ) : (
         <>
-          <h4>Log in to create an article!</h4>
+          <h4 className="content-descriptor">Log in to create an article!</h4>
           <button onClick={() => navigate(`/login`)}>Log in</button>
         </>
       )}

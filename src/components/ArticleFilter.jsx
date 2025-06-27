@@ -7,8 +7,7 @@ function ArticleFilter({
 }) {
   return (
     <form className="sort-block" onSubmit={onSubmit}>
-      <h3>Filter results</h3>
-      <label htmlFor="sort-by">Sort By...</label>
+      <h3>Sort results by...</h3>
       <select id="sort-by" value={sortBy} onChange={onSortChange}>
         <option value="created_at">date</option>
         <option value="comment_count">comment count</option>

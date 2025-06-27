@@ -25,7 +25,7 @@ function CommentCard({
         >
           ↑
         </button>
-        <p>{comment.votes}</p>
+        <p className="vote-count">{comment.votes}</p>
         <button
           onClick={() => onVote(comment.comment_id, -1)}
           disabled={isLoading || comment.deleting}
@@ -35,29 +35,31 @@ function CommentCard({
         </button>
       </section>
       <section className="comment-body">
-        <p>
-          {isOP && (
-            <>
-              <span className="article-poster">OP</span> |{" "}
-            </>
-          )}
-          <Link to={`/users/${comment.author}`} className="username">
-            {comment.author}
-          </Link>{" "}
-          | Posted: {new Date(comment.created_at).toLocaleString()}
+        <div className="comment-header">
+          <p>
+            {isOP && (
+              <>
+                <span className="article-poster">OP</span> |{" "}
+              </>
+            )}
+            <Link to={`/users/${comment.author}`} className="username">
+              {comment.author}
+            </Link>{" "}
+            | Posted: {new Date(comment.created_at).toLocaleString()}
+          </p>
           {isAuthor && !comment.deleting && (
             <button
               onClick={() => onDelete(comment.comment_id)}
-              className="delete-comment"
+              className="delete-button"
               disabled={comment.deleting}
             >
-              delete
+              Delete?
             </button>
           )}
           {comment.deleting && (
             <span className="deleting-text">Deleting...</span>
           )}
-        </p>
+        </div>
         <p>{comment.body}</p>
       </section>
     </section>

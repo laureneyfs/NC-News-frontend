@@ -13,6 +13,12 @@ function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (loggedInUser) {
+      navigate(-1, { replace: true });
+    }
+  }, [loggedInUser, navigate]);
+
+  useEffect(() => {
     setLoadingUsers(true);
     fetchAllUsers()
       .then((data) => {
@@ -31,10 +37,11 @@ function Login() {
     setLoggedInUser(user);
     navigate(-1);
   };
+  if (loggedInUser) return null;
 
   return (
     <>
-      <h2 id="content-descriptor">Choose user to log in as</h2>
+      <h2 class="content-descriptor">Choose user to log in as</h2>
       <>{loadingUsers && <Loading field={"users..."} />}</>
       <section className="user-wrapper">
         {loggedInUser && (
@@ -52,7 +59,11 @@ function Login() {
         {!loadingUsers &&
           !loggedInUser &&
           users.map((user) => (
-            <section key={user.username} className="user-profile">
+            <section
+              key={user.username}
+              className="user-profile clickable"
+              onClick={() => handleLogin(user)}
+            >
               <img
                 className="user-avatar"
                 src={user.avatar_url}
@@ -60,7 +71,6 @@ function Login() {
               />
               <div className="login-fields">
                 <h3>{user.username}</h3>
-                <button onClick={() => handleLogin(user)}>Log in</button>
               </div>
             </section>
           ))}

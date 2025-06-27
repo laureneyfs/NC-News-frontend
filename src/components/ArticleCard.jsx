@@ -52,11 +52,13 @@ function ArticleCard({
         </button>
       </section>
       <div id="image-wrapper">
-        <img
-          className="all-articles-image"
-          src={article_img_url}
-          alt={title || "Article image"}
-        />
+        <Link to={`/articles/${article_id}`}>
+          <img
+            className="all-articles-image"
+            src={article_img_url}
+            alt={title || "Article image"}
+          />
+        </Link>
       </div>
       <section className="article-fields">
         <h3>
@@ -73,7 +75,11 @@ function ArticleCard({
         <p>{comment_count} comments</p>
 
         {onDelete && isAuthor && (
-          <button onClick={() => onDelete(article_id)} disabled={isDeleting}>
+          <button
+            className="delete-button"
+            onClick={() => onDelete(article_id)}
+            disabled={isDeleting}
+          >
             {isDeleting ? "Deleting..." : "Delete"}
           </button>
         )}

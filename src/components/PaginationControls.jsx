@@ -22,6 +22,7 @@ function Pagination({
   return (
     <section className="page-nav">
       <button
+        className="page-button"
         id="prev-page"
         disabled={page === 1}
         onClick={() => handlePageChange(page - 1)}
@@ -30,6 +31,7 @@ function Pagination({
       </button>
       <p id="page-number">Page: {page}</p>
       <button
+        className="page-button"
         id="next-page"
         disabled={articles.length !== 10}
         onClick={() => handlePageChange(page + 1)}

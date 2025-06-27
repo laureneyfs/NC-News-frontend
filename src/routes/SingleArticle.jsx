@@ -130,7 +130,7 @@ function SingleArticle() {
             >
               ↑
             </button>
-            <p>{article.votes}</p>
+            <p className="vote-count">{article.votes}</p>
             <button
               onClick={() => handleVote(article.article_id, -1)}
               disabled={

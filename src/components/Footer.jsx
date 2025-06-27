@@ -1,7 +1,9 @@
 function Footer() {
   return (
     <section id="footer">
-      <p>footer placeholder</p>
+      <p>
+        Created by <a href={"https://github.com/laureneyfs"}>Lauren Evans</a>
+      </p>
     </section>
   );
 }
